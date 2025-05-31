@@ -82,7 +82,7 @@ public class Product {
 
     @Override
     public String toString() {
-        return String.format("Product{id=%d, name='%s', allergic=%b, rating=%d}",
+        return String.format("Продукт %d, '%s'",
                 getId(), getName(), isAllergic(), getRating());
     }
 }
