@@ -2,6 +2,9 @@ package com.skincaretracker.controller;
 
 import com.skincaretracker.model.Product;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
@@ -11,6 +14,8 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.geometry.Insets;
+import javafx.stage.Stage;
+import java.io.IOException;
 import java.util.Optional;
 
 public class ProductsController {
@@ -38,6 +43,9 @@ public class ProductsController {
     @FXML
     private ComboBox<String> filterComboBox;
 
+    @FXML
+    private Button backToDashboardButton;
+
     private final ObservableList<Product> products = FXCollections.observableArrayList();
     private FilteredList<Product> filteredProducts;
 
@@ -54,6 +62,38 @@ public class ProductsController {
         setupFilters();
         createAddDialog();
         loadDummyData();
+    }
+
+    @FXML
+    private void goBackToDashboard() {
+        try {
+            // Загружаем FXML файл дашборда (правильный путь)
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
+            Parent dashboardRoot = loader.load();
+
+            // Получаем текущее окно
+            Stage currentStage = (Stage) backToDashboardButton.getScene().getWindow();
+
+            // Создаем новую сцену с дашбордом
+            Scene dashboardScene = new Scene(dashboardRoot);
+
+            // Добавляем CSS стили если они есть
+            var cssResource = getClass().getResource("/style/style.css");
+            if (cssResource != null) {
+                dashboardScene.getStylesheets().add(cssResource.toExternalForm());
+            }
+
+            // Устанавливаем новую сцену
+            currentStage.setScene(dashboardScene);
+            currentStage.setTitle("Skin Care Tracker - Dashboard");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load dashboard: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Unexpected error: " + e.getMessage());
+        }
     }
 
     private void setupTable() {

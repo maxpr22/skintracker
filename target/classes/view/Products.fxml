@@ -14,8 +14,12 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <!-- Header with Add Product Button -->
+    <!-- Header with Navigation and Add Product Button -->
     <HBox alignment="CENTER_LEFT" spacing="20">
+        <Button fx:id="backToDashboardButton"
+                text="← Back to Dashboard"
+                onAction="#goBackToDashboard"
+                styleClass="secondary-button"/>
         <Text styleClass="section-title" text="My Products"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Button text="Add New Product"

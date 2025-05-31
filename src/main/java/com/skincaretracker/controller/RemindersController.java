@@ -3,12 +3,19 @@ package com.skincaretracker.controller;
 import com.skincaretracker.model.Product;
 import com.skincaretracker.model.Reminder;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.util.StringConverter;
+import javafx.geometry.Insets;
+import javafx.stage.Stage;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,61 +23,42 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.scene.layout.HBox;
 
 public class RemindersController {
     @FXML
     private TableView<Reminder> remindersTable;
-    
+
     @FXML
     private TableColumn<Reminder, Product> productColumn;
-    
+
     @FXML
     private TableColumn<Reminder, String> messageColumn;
-    
+
     @FXML
     private TableColumn<Reminder, LocalDateTime> dateTimeColumn;
-    
+
     @FXML
     private TableColumn<Reminder, Boolean> completedColumn;
-    
+
     @FXML
     private TableColumn<Reminder, Void> actionsColumn;
-    
+
     @FXML
     private ComboBox<String> statusFilter;
-    
+
     @FXML
     private DatePicker dateFilter;
-    
-    @FXML
+
+    // Dialog components - not in FXML
     private Dialog<Reminder> reminderDialog;
-    
-    @FXML
     private ComboBox<Product> productComboBox;
-    
-    @FXML
     private TextArea messageField;
-    
-    @FXML
     private DatePicker datePicker;
-    
-    @FXML
     private ComboBox<Integer> hourComboBox;
-    
-    @FXML
     private ComboBox<Integer> minuteComboBox;
-    
-    @FXML
     private CheckBox repeatCheckBox;
-    
-    @FXML
     private VBox repeatOptionsBox;
-    
-    @FXML
     private ComboBox<String> repeatFrequencyComboBox;
-    
-    @FXML
     private DatePicker endDatePicker;
 
     private final ObservableList<Reminder> reminders = FXCollections.observableArrayList();
@@ -82,7 +70,35 @@ public class RemindersController {
         setupTable();
         setupFilters();
         setupDialog();
-        loadDummyData(); // TODO: Replace with actual data loading
+        loadDummyData();
+    }
+
+    @FXML
+    private void goToDashboard() {
+        try {
+            // Получаем текущую сцену
+            Stage currentStage = (Stage) remindersTable.getScene().getWindow();
+
+            // Загружаем FXML файл дашборда
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dashboard.fxml"));
+            Parent root = loader.load();
+
+            // Создаем новую сцену
+            Scene scene = new Scene(root);
+
+            var cssResource = getClass().getResource("/style/style.css");
+            if (cssResource != null) {
+                scene.getStylesheets().add(cssResource.toExternalForm());
+            }
+
+            // Устанавливаем сцену на текущий stage
+            currentStage.setScene(scene);
+            currentStage.setTitle("Skincare Tracker - Dashboard");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Could not load dashboard: " + e.getMessage());
+        }
     }
 
     private void setupTable() {
@@ -158,36 +174,84 @@ public class RemindersController {
     }
 
     private void setupDialog() {
-        // Setup time ComboBoxes
+        // Create dialog programmatically
+        reminderDialog = new Dialog<>();
+        reminderDialog.setTitle("Reminder");
+        reminderDialog.setHeaderText("Add New Reminder");
+
+        // Create dialog content
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        // Initialize components
+        productComboBox = new ComboBox<>();
+        messageField = new TextArea();
+        datePicker = new DatePicker();
+        hourComboBox = new ComboBox<>();
+        minuteComboBox = new ComboBox<>();
+        repeatCheckBox = new CheckBox("Repeat Reminder");
+        repeatOptionsBox = new VBox(5);
+        repeatFrequencyComboBox = new ComboBox<>();
+        endDatePicker = new DatePicker();
+
+        // Setup components
+        messageField.setPrefRowCount(3);
+        messageField.setPromptText("Reminder Message");
+
         hourComboBox.setItems(FXCollections.observableArrayList(
-            IntStream.rangeClosed(0, 23).boxed().toList()
+                IntStream.rangeClosed(0, 23).boxed().toList()
         ));
         minuteComboBox.setItems(FXCollections.observableArrayList(
-            IntStream.rangeClosed(0, 59).boxed().toList()
+                IntStream.rangeClosed(0, 59).boxed().toList()
         ));
 
-        // Setup product ComboBox
         productComboBox.setItems(FXCollections.observableArrayList(
-            // TODO: Replace with actual product loading
-            new Product(1L, "Face Cleanser", "Gentle daily cleanser", false, 4),
-            new Product(2L, "Moisturizer", "Hydrating cream", false, 5)
+                new Product(1L, "Face Cleanser", "Gentle daily cleanser", false, 4),
+                new Product(2L, "Moisturizer", "Hydrating cream", false, 5)
         ));
 
-        // Setup repeat options
-        repeatFrequencyComboBox.getItems().addAll(
-            "Daily", "Weekly", "Monthly"
-        );
+        repeatFrequencyComboBox.getItems().addAll("Daily", "Weekly", "Monthly");
+
+        // Setup repeat options visibility
+        repeatOptionsBox.getChildren().addAll(repeatFrequencyComboBox, endDatePicker);
+        repeatOptionsBox.setVisible(false);
+        repeatOptionsBox.setManaged(false);
 
         repeatCheckBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
             repeatOptionsBox.setVisible(newVal);
             repeatOptionsBox.setManaged(newVal);
         });
 
+        // Add components to grid
+        grid.add(new Label("Product:"), 0, 0);
+        grid.add(productComboBox, 1, 0);
+        grid.add(new Label("Message:"), 0, 1);
+        grid.add(messageField, 1, 1);
+        grid.add(new Label("Date:"), 0, 2);
+        grid.add(datePicker, 1, 2);
+
+        HBox timeBox = new HBox(5);
+        timeBox.getChildren().addAll(hourComboBox, new Label(":"), minuteComboBox);
+        grid.add(new Label("Time:"), 0, 3);
+        grid.add(timeBox, 1, 3);
+
+        grid.add(repeatCheckBox, 1, 4);
+        grid.add(repeatOptionsBox, 1, 5);
+
+        reminderDialog.getDialogPane().setContent(grid);
+
+        // Add buttons
+        ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+        reminderDialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+        // Set result converter
         reminderDialog.setResultConverter(this::convertDialogResult);
     }
 
     private Reminder convertDialogResult(ButtonType buttonType) {
-        if (buttonType != ButtonType.OK) return null;
+        if (buttonType.getButtonData() != ButtonBar.ButtonData.OK_DONE) return null;
 
         Product selectedProduct = productComboBox.getValue();
         String message = messageField.getText().trim();
@@ -195,8 +259,8 @@ public class RemindersController {
         Integer hour = hourComboBox.getValue();
         Integer minute = minuteComboBox.getValue();
 
-        if (selectedProduct == null || message.isEmpty() || date == null || 
-            hour == null || minute == null) {
+        if (selectedProduct == null || message.isEmpty() || date == null ||
+                hour == null || minute == null) {
             showError("Please fill in all required fields");
             return null;
         }
@@ -208,23 +272,24 @@ public class RemindersController {
         }
 
         return new Reminder(
-            System.currentTimeMillis(),
-            selectedProduct,
-            message,
-            dateTime
+                System.currentTimeMillis(),
+                selectedProduct,
+                message,
+                dateTime
         );
     }
 
     @FXML
     private void showAddReminderDialog() {
         resetDialogFields();
+        reminderDialog.setHeaderText("Add New Reminder");
         Optional<Reminder> result = reminderDialog.showAndWait();
         result.ifPresent(this::addReminder);
     }
 
     private void showEditDialog(Reminder reminder) {
         reminderDialog.setHeaderText("Edit Reminder");
-        
+
         productComboBox.setValue(reminder.getProduct());
         messageField.setText(reminder.getMessage());
         datePicker.setValue(reminder.getDateTime().toLocalDate());
@@ -253,6 +318,7 @@ public class RemindersController {
         endDatePicker.setValue(null);
     }
 
+
     @FXML
     private void clearFilters() {
         statusFilter.setValue("All");
@@ -261,7 +327,6 @@ public class RemindersController {
 
     @FXML
     private void showNotificationSettings() {
-        // TODO: Implement notification settings dialog
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Notification Settings");
         alert.setHeaderText(null);
@@ -280,8 +345,8 @@ public class RemindersController {
                 default -> true;
             };
 
-            boolean matchesDate = date == null || 
-                                reminder.getDateTime().toLocalDate().equals(date);
+            boolean matchesDate = date == null ||
+                    reminder.getDateTime().toLocalDate().equals(date);
 
             return matchesStatus && matchesDate;
         });
@@ -315,14 +380,13 @@ public class RemindersController {
     }
 
     private void loadDummyData() {
-        // Add some sample reminders
         Product product1 = new Product(1L, "Face Cleanser", "Gentle daily cleanser", false, 4);
         Product product2 = new Product(2L, "Moisturizer", "Hydrating cream", false, 5);
 
         reminders.addAll(
-            new Reminder(1L, product1, "Morning cleanse", LocalDateTime.now().plusHours(1)),
-            new Reminder(2L, product2, "Evening moisturizer", LocalDateTime.now().plusDays(1)),
-            new Reminder(3L, product1, "Deep cleanse", LocalDateTime.now().plusDays(2))
+                new Reminder(1L, product1, "Morning cleanse", LocalDateTime.now().plusHours(1)),
+                new Reminder(2L, product2, "Evening moisturizer", LocalDateTime.now().plusDays(1)),
+                new Reminder(3L, product1, "Deep cleanse", LocalDateTime.now().plusDays(2))
         );
     }
 }
