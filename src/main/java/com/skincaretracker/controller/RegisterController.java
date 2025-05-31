@@ -1,5 +1,7 @@
 package com.skincaretracker.controller;
 
+import com.skincaretracker.model.User;
+import com.skincaretracker.util.DatabaseManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,29 +27,77 @@ public class RegisterController {
     @FXML
     private Label errorLabel;
 
+    private DatabaseManager databaseManager;
+
+    public void initialize() {
+        databaseManager = DatabaseManager.getInstance();
+        hideError();
+    }
+
     @FXML
     public void handleCreateAccount(ActionEvent event) {
-        String username = usernameField.getText();
-        String email = emailField.getText();
+        String username = usernameField.getText().trim();
+        String email = emailField.getText().trim();
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
+        // Валідація полів
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            showError("Please fill in all fields");
+            showError("Будь ласка, заповніть всі поля");
             return;
         }
 
+        // Перевірка довжини логіну
+        if (username.length() < 3) {
+            showError("Логін повинен містити принаймні 3 символи");
+            return;
+        }
+
+        // Базова перевірка email
+        if (!isValidEmail(email)) {
+            showError("Введіть коректну email адресу");
+            return;
+        }
+
+        // Перевірка паролів
         if (!password.equals(confirmPassword)) {
-            showError("Passwords do not match");
+            showError("Паролі не співпадають");
             return;
         }
 
-        // TODO: Implement actual registration logic
-        System.out.println("Registration attempt: " + username + " / " + email);
-        hideError();
+        // Перевірка складності паролю
+        if (password.length() < 6) {
+            showError("Пароль повинен містити принаймні 6 символів");
+            return;
+        }
 
-        // Navigate back to login
-        handleBackToLogin(event);
+        // Спроба створення користувача
+        User newUser = databaseManager.createUser(username, email, password);
+
+        if (newUser != null) {
+            showSuccess("Акаунт успішно створено!");
+
+            // Очищуємо поля
+            clearFields();
+
+            // Затримка перед переходом на логін
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1500); // 1.5 секунди
+                    javafx.application.Platform.runLater(() -> handleBackToLogin(event));
+                } catch (InterruptedException e) {
+                    javafx.application.Platform.runLater(() -> handleBackToLogin(event));
+                }
+            }).start();
+
+        } else {
+            // Перевіряємо чи користувач з таким логіном або email вже існує
+            if (isUserExists(username, email)) {
+                showError("Користувач з таким логіном або email вже існує");
+            } else {
+                showError("Помилка при створенні акаунту. Спробуйте ще раз");
+            }
+        }
     }
 
     @FXML
@@ -69,6 +119,14 @@ public class RegisterController {
 
     private void showError(String message) {
         errorLabel.setText(message);
+        errorLabel.setStyle("-fx-text-fill: #ff4444;");
+        errorLabel.setVisible(true);
+        errorLabel.setManaged(true);
+    }
+
+    private void showSuccess(String message) {
+        errorLabel.setText(message);
+        errorLabel.setStyle("-fx-text-fill: #4CAF50;");
         errorLabel.setVisible(true);
         errorLabel.setManaged(true);
     }
@@ -76,5 +134,30 @@ public class RegisterController {
     private void hideError() {
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
+    }
+
+    private void clearFields() {
+        usernameField.clear();
+        emailField.clear();
+        passwordField.clear();
+        confirmPasswordField.clear();
+    }
+
+    private boolean isValidEmail(String email) {
+        // Базова перевірка email регулярним виразом
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        return email.matches(emailRegex);
+    }
+
+    private boolean isUserExists(String username, String email) {
+        // Перевіряємо чи існує користувач з таким логіном або email
+        // Це спрощена перевірка - в ідеалі потрібно додати окремі методи в DatabaseManager
+        try {
+            User testUser1 = databaseManager.getUser(username, "dummy");
+            User testUser2 = databaseManager.getUser("dummy", email);
+            return testUser1 != null || testUser2 != null;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

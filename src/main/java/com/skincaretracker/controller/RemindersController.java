@@ -2,6 +2,7 @@ package com.skincaretracker.controller;
 
 import com.skincaretracker.model.Product;
 import com.skincaretracker.model.Reminder;
+import com.skincaretracker.util.DatabaseManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -62,28 +63,31 @@ public class RemindersController {
     private DatePicker endDatePicker;
 
     private final ObservableList<Reminder> reminders = FXCollections.observableArrayList();
+    private final ObservableList<Reminder> allReminders = FXCollections.observableArrayList();
+    private final DatabaseManager dbManager = DatabaseManager.getInstance();
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @FXML
     public void initialize() {
+        // Перевіряємо чи користувач авторизований
+        if (!dbManager.isUserLoggedIn()) {
+            showError("User not logged in. Please log in first.");
+            return;
+        }
+
         setupTable();
         setupFilters();
         setupDialog();
-        loadDummyData();
+        loadRemindersFromDatabase();
     }
 
     @FXML
     private void goToDashboard() {
         try {
-            // Получаем текущую сцену
             Stage currentStage = (Stage) remindersTable.getScene().getWindow();
-
-            // Загружаем FXML файл дашборда
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/dashboard.fxml"));
             Parent root = loader.load();
-
-            // Создаем новую сцену
             Scene scene = new Scene(root);
 
             var cssResource = getClass().getResource("/style/style.css");
@@ -91,7 +95,6 @@ public class RemindersController {
                 scene.getStylesheets().add(cssResource.toExternalForm());
             }
 
-            // Устанавливаем сцену на текущий stage
             currentStage.setScene(scene);
             currentStage.setTitle("Skincare Tracker - Dashboard");
 
@@ -132,10 +135,25 @@ public class RemindersController {
             }
         });
 
-        completedColumn.setCellFactory(column -> new CheckBoxTableCell<>());
+        // Налаштування checkbox для completed колонки
+        completedColumn.setCellFactory(column -> new CheckBoxTableCell<>() {
+            @Override
+            public void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (!empty) {
+                    CheckBox checkBox = (CheckBox) getGraphic();
+                    if (checkBox != null) {
+                        checkBox.setOnAction(event -> {
+                            Reminder reminder = getTableView().getItems().get(getIndex());
+                            reminder.setCompleted(checkBox.isSelected());
+                            updateReminderInDatabase(reminder);
+                        });
+                    }
+                }
+            }
+        });
 
         setupActionsColumn();
-
         remindersTable.setItems(reminders);
     }
 
@@ -174,12 +192,10 @@ public class RemindersController {
     }
 
     private void setupDialog() {
-        // Create dialog programmatically
         reminderDialog = new Dialog<>();
         reminderDialog.setTitle("Reminder");
         reminderDialog.setHeaderText("Add New Reminder");
 
-        // Create dialog content
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
@@ -205,11 +221,6 @@ public class RemindersController {
         ));
         minuteComboBox.setItems(FXCollections.observableArrayList(
                 IntStream.rangeClosed(0, 59).boxed().toList()
-        ));
-
-        productComboBox.setItems(FXCollections.observableArrayList(
-                new Product(1L, "Face Cleanser", "Gentle daily cleanser", false, 4),
-                new Product(2L, "Moisturizer", "Hydrating cream", false, 5)
         ));
 
         repeatFrequencyComboBox.getItems().addAll("Daily", "Weekly", "Monthly");
@@ -242,12 +253,19 @@ public class RemindersController {
 
         reminderDialog.getDialogPane().setContent(grid);
 
-        // Add buttons
         ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         reminderDialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-        // Set result converter
         reminderDialog.setResultConverter(this::convertDialogResult);
+    }
+
+    private void loadProductsIntoComboBox() {
+        try {
+            var products = dbManager.getCurrentUserProducts();
+            productComboBox.setItems(FXCollections.observableArrayList(products));
+        } catch (Exception e) {
+            showError("Error loading products: " + e.getMessage());
+        }
     }
 
     private Reminder convertDialogResult(ButtonType buttonType) {
@@ -271,24 +289,22 @@ public class RemindersController {
             return null;
         }
 
-        return new Reminder(
-                System.currentTimeMillis(),
-                selectedProduct,
-                message,
-                dateTime
-        );
+        return new Reminder(0L, selectedProduct, message, dateTime);
     }
 
     @FXML
     private void showAddReminderDialog() {
         resetDialogFields();
+        loadProductsIntoComboBox();
         reminderDialog.setHeaderText("Add New Reminder");
+
         Optional<Reminder> result = reminderDialog.showAndWait();
-        result.ifPresent(this::addReminder);
+        result.ifPresent(this::addReminderToDatabase);
     }
 
     private void showEditDialog(Reminder reminder) {
         reminderDialog.setHeaderText("Edit Reminder");
+        loadProductsIntoComboBox();
 
         productComboBox.setValue(reminder.getProduct());
         messageField.setText(reminder.getMessage());
@@ -301,7 +317,7 @@ public class RemindersController {
             reminder.setProduct(updatedReminder.getProduct());
             reminder.setMessage(updatedReminder.getMessage());
             reminder.setDateTime(updatedReminder.getDateTime());
-            remindersTable.refresh();
+            updateReminderInDatabase(reminder);
         });
 
         reminderDialog.setHeaderText("Add New Reminder");
@@ -317,7 +333,6 @@ public class RemindersController {
         repeatFrequencyComboBox.setValue(null);
         endDatePicker.setValue(null);
     }
-
 
     @FXML
     private void clearFilters() {
@@ -338,7 +353,7 @@ public class RemindersController {
         String status = statusFilter.getValue();
         LocalDate date = dateFilter.getValue();
 
-        ObservableList<Reminder> filteredList = reminders.filtered(reminder -> {
+        ObservableList<Reminder> filteredList = allReminders.filtered(reminder -> {
             boolean matchesStatus = switch (status) {
                 case "Pending" -> !reminder.isCompleted();
                 case "Completed" -> reminder.isCompleted();
@@ -351,7 +366,7 @@ public class RemindersController {
             return matchesStatus && matchesDate;
         });
 
-        remindersTable.setItems(filteredList);
+        reminders.setAll(filteredList);
     }
 
     private void showDeleteConfirmation(Reminder reminder) {
@@ -362,13 +377,68 @@ public class RemindersController {
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            reminders.remove(reminder);
+            deleteReminderFromDatabase(reminder);
         }
     }
 
-    private void addReminder(Reminder reminder) {
-        reminders.add(reminder);
-        filterReminders();
+    // Database operations
+    private void loadRemindersFromDatabase() {
+        try {
+            var remindersFromDb = dbManager.getCurrentUserReminders();
+            allReminders.setAll(remindersFromDb);
+            filterReminders(); // Apply current filters
+        } catch (Exception e) {
+            showError("Error loading reminders: " + e.getMessage());
+        }
+    }
+
+    private void addReminderToDatabase(Reminder reminder) {
+        try {
+            Reminder createdReminder = dbManager.createReminderForCurrentUser(
+                    reminder.getProduct().getId(),
+                    reminder.getMessage(),
+                    reminder.getDateTime()
+            );
+
+            if (createdReminder != null) {
+                allReminders.add(createdReminder);
+                filterReminders();
+                showInfo("Reminder added successfully!");
+            } else {
+                showError("Failed to create reminder");
+            }
+        } catch (Exception e) {
+            showError("Error adding reminder: " + e.getMessage());
+        }
+    }
+
+    private void updateReminderInDatabase(Reminder reminder) {
+        try {
+            boolean updated = dbManager.updateReminder(reminder);
+            if (updated) {
+                remindersTable.refresh();
+                showInfo("Reminder updated successfully!");
+            } else {
+                showError("Failed to update reminder");
+            }
+        } catch (Exception e) {
+            showError("Error updating reminder: " + e.getMessage());
+        }
+    }
+
+    private void deleteReminderFromDatabase(Reminder reminder) {
+        try {
+            boolean deleted = dbManager.deleteReminder(reminder.getId());
+            if (deleted) {
+                allReminders.remove(reminder);
+                filterReminders();
+                showInfo("Reminder deleted successfully!");
+            } else {
+                showError("Failed to delete reminder");
+            }
+        } catch (Exception e) {
+            showError("Error deleting reminder: " + e.getMessage());
+        }
     }
 
     private void showError(String message) {
@@ -379,14 +449,16 @@ public class RemindersController {
         alert.showAndWait();
     }
 
-    private void loadDummyData() {
-        Product product1 = new Product(1L, "Face Cleanser", "Gentle daily cleanser", false, 4);
-        Product product2 = new Product(2L, "Moisturizer", "Hydrating cream", false, 5);
+    private void showInfo(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 
-        reminders.addAll(
-                new Reminder(1L, product1, "Morning cleanse", LocalDateTime.now().plusHours(1)),
-                new Reminder(2L, product2, "Evening moisturizer", LocalDateTime.now().plusDays(1)),
-                new Reminder(3L, product1, "Deep cleanse", LocalDateTime.now().plusDays(2))
-        );
+    // Метод для оновлення даних ззовні (наприклад, після повернення з іншого екрана)
+    public void refreshData() {
+        loadRemindersFromDatabase();
     }
 }

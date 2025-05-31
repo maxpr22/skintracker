@@ -1,6 +1,7 @@
 package com.skincaretracker.controller;
 
 import com.skincaretracker.model.Product;
+import com.skincaretracker.util.DatabaseManager;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,6 +16,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.geometry.Insets;
 import javafx.stage.Stage;
+import javafx.application.Platform;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -46,44 +48,46 @@ public class ProductsController {
     @FXML
     private Button backToDashboardButton;
 
+    private final DatabaseManager dbManager = DatabaseManager.getInstance();
     private final ObservableList<Product> products = FXCollections.observableArrayList();
     private FilteredList<Product> filteredProducts;
 
-    // Dialog components - создаются программно
-    private Dialog<Product> addProductDialog;
+    // Dialog components
+    private Dialog<Product> productDialog;
     private TextField productNameField;
     private TextArea productDescriptionField;
     private CheckBox allergicCheckBox;
     private HBox ratingStars;
     private int selectedRating = 0;
+    private Product editingProduct = null; // Track which product we're editing
 
     public void initialize() {
+        if (!dbManager.isUserLoggedIn()) {
+            showError("User not logged in. Please login first.");
+            goBackToDashboard();
+            return;
+        }
+
         setupTable();
         setupFilters();
-        createAddDialog();
-        loadDummyData();
+        createProductDialog();
+        loadProductsFromDatabase();
     }
 
     @FXML
     private void goBackToDashboard() {
         try {
-            // Загружаем FXML файл дашборда (правильный путь)
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Dashboard.fxml"));
             Parent dashboardRoot = loader.load();
 
-            // Получаем текущее окно
             Stage currentStage = (Stage) backToDashboardButton.getScene().getWindow();
-
-            // Создаем новую сцену с дашбордом
             Scene dashboardScene = new Scene(dashboardRoot);
 
-            // Добавляем CSS стили если они есть
             var cssResource = getClass().getResource("/style/style.css");
             if (cssResource != null) {
                 dashboardScene.getStylesheets().add(cssResource.toExternalForm());
             }
 
-            // Устанавливаем новую сцену
             currentStage.setScene(dashboardScene);
             currentStage.setTitle("Skin Care Tracker - Dashboard");
 
@@ -119,10 +123,8 @@ public class ProductsController {
             }
         });
 
-        // Configure actions column
         setupActionsColumn();
 
-        // Setup filtered list
         filteredProducts = new FilteredList<>(products);
         productsTable.setItems(filteredProducts);
     }
@@ -164,7 +166,6 @@ public class ProductsController {
         filterComboBox.getItems().addAll("All", "Allergic", "Non-Allergic");
         filterComboBox.setValue("All");
 
-        // Add listeners for filtering
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProducts());
         filterComboBox.valueProperty().addListener((observable, oldValue, newValue) -> filterProducts());
     }
@@ -192,18 +193,20 @@ public class ProductsController {
 
     @FXML
     private void showAddProductDialog() {
+        editingProduct = null; // We're creating a new product
         resetDialogFields();
+        productDialog.setHeaderText("Add New Product");
 
-        Optional<Product> result = addProductDialog.showAndWait();
-        result.ifPresent(this::addProduct);
+        Optional<Product> result = productDialog.showAndWait();
+        if (result.isPresent()) {
+            addProduct(result.get());
+        }
     }
 
-    private void createAddDialog() {
-        addProductDialog = new Dialog<>();
-        addProductDialog.setTitle("Product Manager");
-        addProductDialog.setHeaderText("Add New Product");
+    private void createProductDialog() {
+        productDialog = new Dialog<>();
+        productDialog.setTitle("Product Manager");
 
-        // Create dialog content
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
 
@@ -216,7 +219,6 @@ public class ProductsController {
 
         allergicCheckBox = new CheckBox("Mark as Allergic");
 
-        // Rating stars
         HBox ratingContainer = new HBox(10);
         ratingContainer.getChildren().add(new Label("Rating:"));
         ratingStars = new HBox(5);
@@ -232,33 +234,72 @@ public class ProductsController {
                 ratingContainer
         );
 
-        DialogPane dialogPane = addProductDialog.getDialogPane();
+        DialogPane dialogPane = productDialog.getDialogPane();
         dialogPane.setContent(content);
-
-        // Add buttons
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Set result converter
-        addProductDialog.setResultConverter(buttonType -> {
+        // Improve validation and result conversion
+        productDialog.setResultConverter(buttonType -> {
             if (buttonType == ButtonType.OK) {
-                String name = productNameField.getText().trim();
-                String description = productDescriptionField.getText().trim();
-
-                if (name.isEmpty()) {
-                    showError("Product name is required");
-                    return null;
-                }
-
-                return new Product(
-                        System.currentTimeMillis(),
-                        name,
-                        description,
-                        allergicCheckBox.isSelected(),
-                        selectedRating
-                );
+                return validateAndCreateProduct();
             }
             return null;
         });
+
+        // Add validation on OK button
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        okButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
+            if (!isValidInput()) {
+                event.consume(); // Prevent dialog from closing
+            }
+        });
+    }
+
+    private Product validateAndCreateProduct() {
+        String name = productNameField.getText().trim();
+        String description = productDescriptionField.getText().trim();
+
+        if (!isValidInput()) {
+            return null;
+        }
+
+        if (editingProduct != null) {
+            // Return updated product with existing ID
+            return new Product(
+                    editingProduct.getId(),
+                    name,
+                    description,
+                    allergicCheckBox.isSelected(),
+                    selectedRating
+            );
+        } else {
+            // Return new product (ID will be set by database)
+            return new Product(
+                    0L,
+                    name,
+                    description,
+                    allergicCheckBox.isSelected(),
+                    selectedRating
+            );
+        }
+    }
+
+    private boolean isValidInput() {
+        String name = productNameField.getText().trim();
+
+        if (name.isEmpty()) {
+            showError("Product name is required");
+            productNameField.requestFocus();
+            return false;
+        }
+
+        if (name.length() > 100) { // Assuming max length
+            showError("Product name is too long (max 100 characters)");
+            productNameField.requestFocus();
+            return false;
+        }
+
+        return true;
     }
 
     private void setupRatingStars() {
@@ -290,58 +331,142 @@ public class ProductsController {
         allergicCheckBox.setSelected(false);
         selectedRating = 0;
         updateRatingStars();
-        addProductDialog.setHeaderText("Add New Product");
     }
 
     private void showEditDialog(Product product) {
+        editingProduct = product; // Set the product we're editing
+
         productNameField.setText(product.getName());
         productDescriptionField.setText(product.getDescription());
         allergicCheckBox.setSelected(product.isAllergic());
         selectedRating = product.getRating();
         updateRatingStars();
-        addProductDialog.setHeaderText("Edit Product");
+        productDialog.setHeaderText("Edit Product");
 
-        Optional<Product> result = addProductDialog.showAndWait();
-        result.ifPresent(updatedProduct -> {
-            product.setName(updatedProduct.getName());
-            product.setDescription(updatedProduct.getDescription());
-            product.setAllergic(updatedProduct.isAllergic());
-            product.setRating(updatedProduct.getRating());
-            productsTable.refresh();
-        });
+        Optional<Product> result = productDialog.showAndWait();
+        if (result.isPresent()) {
+            updateProduct(result.get());
+        }
+    }
+
+    private void updateProduct(Product updatedProduct) {
+        try {
+            boolean success = dbManager.updateProduct(updatedProduct);
+            if (success) {
+                // Find and update the product in our list
+                for (int i = 0; i < products.size(); i++) {
+                    Product p = products.get(i);
+                    if (p.getId().equals(updatedProduct.getId())) {
+                        products.set(i, updatedProduct);
+                        break;
+                    }
+                }
+
+                Platform.runLater(() -> {
+                    productsTable.refresh();
+                    filterProducts();
+                });
+                showInfo("Product updated successfully!");
+            } else {
+                showError("Failed to update product in database");
+                // Reload from database to revert changes
+                loadProductsFromDatabase();
+            }
+        } catch (Exception e) {
+            showError("Error updating product: " + e.getMessage());
+            loadProductsFromDatabase();
+        }
     }
 
     private void showDeleteConfirmation(Product product) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Delete Product");
         alert.setHeaderText("Delete " + product.getName());
-        alert.setContentText("Are you sure you want to delete this product?");
+        alert.setContentText("Are you sure you want to delete this product? This will also delete all associated reminders.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            products.remove(product);
+            deleteProduct(product);
+        }
+    }
+
+    private void deleteProduct(Product product) {
+        try {
+            boolean success = dbManager.deleteProduct(product.getId());
+            if (success) {
+                Platform.runLater(() -> {
+                    products.remove(product);
+                });
+                showInfo("Product deleted successfully!");
+            } else {
+                showError("Failed to delete product from database");
+            }
+        } catch (Exception e) {
+            showError("Error deleting product: " + e.getMessage());
         }
     }
 
     private void addProduct(Product product) {
-        products.add(product);
+        try {
+            Product createdProduct = dbManager.createProductForCurrentUser(
+                    product.getName(),
+                    product.getDescription(),
+                    product.isAllergic(),
+                    product.getRating()
+            );
+
+            if (createdProduct != null) {
+                Platform.runLater(() -> {
+                    products.add(createdProduct);
+                    filterProducts();
+                    // Scroll to the new product
+                    productsTable.getSelectionModel().select(createdProduct);
+                    productsTable.scrollTo(createdProduct);
+                });
+                showInfo("Product added successfully!");
+            } else {
+                showError("Failed to add product to database");
+            }
+        } catch (Exception e) {
+            showError("Error adding product: " + e.getMessage());
+        }
+    }
+
+    private void loadProductsFromDatabase() {
+        try {
+            products.clear();
+            products.addAll(dbManager.getCurrentUserProducts());
+
+            Platform.runLater(() -> {
+                filterProducts();
+            });
+        } catch (Exception e) {
+            showError("Failed to load products from database: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void refreshProducts() {
+        loadProductsFromDatabase();
     }
 
     private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 
-    private void loadDummyData() {
-        products.addAll(
-                new Product(1L, "Face Cleanser", "Gentle daily cleanser for sensitive skin", false, 4),
-                new Product(2L, "Moisturizer", "Hydrating cream with hyaluronic acid", false, 5),
-                new Product(3L, "Sunscreen", "SPF 50 broad spectrum protection", true, 3),
-                new Product(4L, "Serum", "Vitamin C brightening serum", false, 4),
-                new Product(5L, "Toner", "Alcohol-free balancing toner", true, 2)
-        );
+    private void showInfo(String message) {
+        Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText(message);
+            alert.showAndWait();
+        });
     }
 }

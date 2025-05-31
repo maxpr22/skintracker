@@ -1,5 +1,10 @@
 package com.skincaretracker.controller;
 
+import com.skincaretracker.model.User;
+import com.skincaretracker.model.Product;
+import com.skincaretracker.model.Reminder;
+import com.skincaretracker.util.DatabaseManager;
+
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,6 +16,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.event.ActionEvent;
 import java.io.IOException;
+import java.util.List;
 
 public class DashboardController {
     @FXML
@@ -25,17 +31,65 @@ public class DashboardController {
     @FXML
     private Text reminderCount;
 
-    // Убрана аннотация @FXML - initialize() вызывается автоматически
+    private DatabaseManager dbManager;
+
     public void initialize() {
-        // TODO: Load actual user data
-        if (userNameLabel != null) {
-            userNameLabel.setText("Welcome, Demo User");
-        }
+        dbManager = DatabaseManager.getInstance();
+        loadUserData();
         updateCounts();
     }
 
+    /**
+     * Загружает данные текущего пользователя
+     */
+    private void loadUserData() {
+        User currentUser = dbManager.getCurrentUser();
+        if (currentUser != null && userNameLabel != null) {
+            userNameLabel.setText("Welcome, " + currentUser.getUsername());
+        } else if (userNameLabel != null) {
+            userNameLabel.setText("Welcome, Guest");
+            // Если пользователь не авторизован, возможно стоит перенаправить на логин
+            handleUserNotLoggedIn();
+        }
+    }
+
+    /**
+     * Обновляет счетчики продуктов и напоминаний
+     */
     private void updateCounts() {
-        // TODO: Get actual counts from database
+        try {
+            if (!dbManager.isUserLoggedIn()) {
+                setCountsToZero();
+                return;
+            }
+
+            // Получаем продукты текущего пользователя
+            List<Product> products = dbManager.getCurrentUserProducts();
+            if (productCount != null) {
+                productCount.setText(String.valueOf(products.size()));
+            }
+
+            // Получаем напоминания текущего пользователя
+            List<Reminder> reminders = dbManager.getCurrentUserReminders();
+            if (reminderCount != null) {
+                // Считаем только активные (незавершенные) напоминания
+                long activeReminders = reminders.stream()
+                        .filter(reminder -> !reminder.isCompleted())
+                        .count();
+                reminderCount.setText(String.valueOf(activeReminders));
+            }
+
+        } catch (Exception e) {
+            System.err.println("Error updating counts: " + e.getMessage());
+            setCountsToZero();
+            showError("Error loading dashboard data: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Устанавливает счетчики в ноль
+     */
+    private void setCountsToZero() {
         if (productCount != null) {
             productCount.setText("0");
         }
@@ -44,25 +98,67 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Обрабатывает случай, когда пользователь не авторизован
+     */
+    private void handleUserNotLoggedIn() {
+        // Можно добавить логику для перенаправления на страницу логина
+        // или показать предупреждение
+        System.out.println("Warning: No user logged in on dashboard");
+    }
+
+    /**
+     * Обновляет дашборд (может быть вызван извне после изменений данных)
+     */
+    public void refreshDashboard() {
+        loadUserData();
+        updateCounts();
+    }
+
     @FXML
     private void showProducts() {
+        if (!checkUserLoggedIn()) return;
         loadView("/view/Products.fxml", "products view");
     }
 
     @FXML
     private void showReminders() {
+        if (!checkUserLoggedIn()) return;
         loadView("/view/Reminders.fxml", "reminders view");
     }
 
     @FXML
     private void showProfile() {
+        if (!checkUserLoggedIn()) return;
         loadView("/view/Profile.fxml", "profile view");
     }
 
-    // Вспомогательный метод для загрузки представлений
+    /**
+     * Проверяет, авторизован ли пользователь
+     */
+    private boolean checkUserLoggedIn() {
+        if (!dbManager.isUserLoggedIn()) {
+            showWarning("Please log in to access this feature.");
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Вспомогательный метод для загрузки представлений
+     */
     private void loadView(String fxmlPath, String viewName) {
         try {
-            Parent view = FXMLLoader.load(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent view = loader.load();
+
+            // Если контроллер загруженного представления имеет метод для обновления,
+            // можно его вызвать
+            Object controller = loader.getController();
+            if (controller instanceof RefreshableController) {
+                ((RefreshableController) controller).refresh();
+            }
+
             contentArea.getChildren().clear();
             contentArea.getChildren().add(view);
         } catch (IOException e) {
@@ -75,7 +171,10 @@ public class DashboardController {
     @FXML
     private void handleLogout(ActionEvent event) {
         try {
-            // Load the login view
+            // Очищаем текущего пользователя в DatabaseManager
+            dbManager.setCurrentUser(null);
+
+            // Загружаем представление логина
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
             Parent loginRoot = loader.load();
 
@@ -87,11 +186,13 @@ public class DashboardController {
                 loginScene.getStylesheets().add(cssResource.toExternalForm());
             }
 
-            // Get current stage and set new scene
+            // Получаем текущую сцену и устанавливаем новую
             Stage stage = (Stage) contentArea.getScene().getWindow();
             stage.setScene(loginScene);
             stage.setTitle("Skin Care Tracker - Login");
             stage.show();
+
+            System.out.println("User logged out successfully");
         } catch (IOException e) {
             showError("Error returning to login: " + e.getMessage());
         } catch (Exception e) {
@@ -99,14 +200,36 @@ public class DashboardController {
         }
     }
 
+    /**
+     * Показывает сообщение об ошибке
+     */
     private void showError(String message) {
-        // Улучшенная обработка ошибок с диалоговым окном
-        System.err.println(message);
+        System.err.println("Error: " + message);
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Error");
         alert.setHeaderText("An error occurred");
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * Показывает предупреждение
+     */
+    private void showWarning(String message) {
+        System.out.println("Warning: " + message);
+
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Warning");
+        alert.setHeaderText("Access Restricted");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    /**
+     * Интерфейс для контроллеров, которые можно обновлять
+     */
+    public interface RefreshableController {
+        void refresh();
     }
 }
