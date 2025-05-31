@@ -1,168 +1,811 @@
-/* Global Styles */
+/* Основні кольори та змінні */
 .root {
-    -fx-background-color: #ffffff;
-    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+    /* Primary Colors */
+    -fx-primary-color: #6c63ff;
+    -fx-primary-dark: #5a52d5;
+    -fx-secondary-color: #00d4aa;
+    -fx-secondary-dark: #00b894;
+
+    /* Background Colors */
+    -fx-bg-primary: #f8f9fa;
+    -fx-bg-secondary: #ffffff;
+    -fx-bg-card: #ffffff;
+
+    /* Text Colors */
+    -fx-text-primary: #2d3436;
+    -fx-text-secondary: #636e72;
+    -fx-text-light: #74b9ff;
+
+    /* Border Colors */
+    -fx-border-light: #e9ecef;
+    -fx-border-medium: #ddd;
+
+    /* Shadow */
+    -fx-shadow: rgba(0, 0, 0, 0.1);
+    -fx-shadow-hover: rgba(0, 0, 0, 0.15);
 }
 
-/* Login Screen */
-.login-pane {
-    -fx-background-color: #f8f9fa;
-    -fx-padding: 20px;
-}
-
-.text-field, .password-field {
-    -fx-background-color: white;
-    -fx-border-color: #dee2e6;
-    -fx-border-radius: 4px;
-    -fx-padding: 8px;
-    -fx-font-size: 14px;
-}
-
-.text-field:focused, .password-field:focused {
-    -fx-border-color: #007bff;
-    -fx-border-width: 2px;
-}
-
-.button {
-    -fx-background-color: #007bff;
-    -fx-text-fill: white;
-    -fx-font-size: 14px;
-    -fx-padding: 8px 16px;
-    -fx-border-radius: 4px;
-    -fx-cursor: hand;
-}
-
-.button:hover {
-    -fx-background-color: #0056b3;
-}
-
-/* Dashboard */
+/* Основна панель */
 .dashboard-pane {
-    -fx-background-color: #ffffff;
+    -fx-background-color: -fx-bg-primary;
+    -fx-font-family: "Segoe UI", "Roboto", "Arial", sans-serif;
 }
 
+/* Верхній заголовок */
+.header-pane {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-light transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 5, 0, 0, 2);
+}
+
+.header-pane .label {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 16px;
+    -fx-font-weight: 500;
+}
+
+/* Бічна навігація */
 .side-nav {
-    -fx-background-color: #343a40;
-    -fx-padding: 10px;
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent -fx-border-light transparent transparent;
+    -fx-border-width: 0 1 0 0;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 3, 0, 2, 0);
 }
 
+/* Кнопки навігації */
 .nav-button {
     -fx-background-color: transparent;
-    -fx-text-fill: #ffffff;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 10px;
+    -fx-text-fill: -fx-text-secondary;
     -fx-font-size: 14px;
+    -fx-font-weight: 500;
+    -fx-padding: 12 16 12 16;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+    -fx-alignment: CENTER_LEFT;
 }
 
 .nav-button:hover {
-    -fx-background-color: #495057;
+    -fx-background-color: linear-gradient(to right, -fx-primary-color, #8b7fff);
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-shadow-hover, 8, 0, 0, 3);
+    -fx-scale-x: 1.02;
+    -fx-scale-y: 1.02;
 }
 
-/* Product List */
-.product-list {
-    -fx-background-color: white;
-    -fx-padding: 10px;
+.nav-button:pressed {
+    -fx-background-color: -fx-primary-dark;
+    -fx-scale-x: 0.98;
+    -fx-scale-y: 0.98;
 }
 
-.product-card {
-    -fx-background-color: white;
-    -fx-border-color: #dee2e6;
-    -fx-border-radius: 4px;
-    -fx-padding: 10px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+/* Кнопка виходу */
+.logout-button {
+    -fx-text-fill: #e74c3c;
 }
 
-/* Reminder Section */
-.reminder-pane {
-    -fx-background-color: white;
-    -fx-padding: 15px;
+.logout-button:hover {
+    -fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+    -fx-text-fill: white;
 }
 
-.date-picker {
-    -fx-background-color: white;
-    -fx-border-color: #dee2e6;
-    -fx-border-radius: 4px;
+/* Область контенту */
+.content-area {
+    -fx-background-color: -fx-bg-primary;
 }
 
-/* Rating Stars */
-.rating-star {
-    -fx-fill: #ffc107;
+/* Вітальний вигляд */
+.welcome-view {
+    -fx-background-color: transparent;
+}
+
+/* Заголовки */
+.title-text {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-fill: linear-gradient(to right, -fx-primary-color, -fx-secondary-color);
+    -fx-text-alignment: center;
+}
+
+.subtitle-text {
+    -fx-font-size: 18px;
+    -fx-fill: -fx-text-secondary;
+    -fx-font-weight: 300;
+    -fx-text-alignment: center;
+}
+
+/* Картки панелі керування */
+.dashboard-card {
+    -fx-background-color: -fx-bg-card;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 10, 0, 0, 4);
+    -fx-min-width: 150;
     -fx-cursor: hand;
 }
 
-.rating-star:hover {
-    -fx-fill: #ffdb58;
+.dashboard-card:hover {
+    -fx-effect: dropshadow(gaussian, -fx-shadow-hover, 15, 0, 0, 6);
+    -fx-scale-x: 1.05;
+    -fx-scale-y: 1.05;
 }
 
-/* Alerts and Notifications */
-.dialog-pane {
-    -fx-background-color: white;
+/* Заголовки карток */
+.card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
+    -fx-fill: -fx-text-primary;
 }
 
-.dialog-pane .header-panel {
-    -fx-background-color: #007bff;
-}
-
-.dialog-pane .header-panel .label {
-    -fx-text-fill: white;
-}
-
-/* Profile Section */
-.profile-pane {
-    -fx-background-color: white;
-    -fx-padding: 20px;
-}
-
-.profile-header {
-    -fx-font-size: 24px;
+.card-count {
+    -fx-font-size: 28px;
     -fx-font-weight: bold;
-    -fx-padding: 0 0 20px 0;
+    -fx-fill: -fx-primary-color;
 }
 
-/* Scroll Bars */
-.scroll-bar:vertical,
-.scroll-bar:horizontal {
+/* Основні кнопки */
+.primary-button {
+    -fx-background-color: linear-gradient(to right, -fx-primary-color, #8b7fff);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 24 12 24;
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+}
+
+.primary-button:hover {
+    -fx-background-color: linear-gradient(to right, -fx-primary-dark, #7a6fd9);
+    -fx-effect: dropshadow(gaussian, -fx-shadow-hover, 12, 0, 0, 4);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.primary-button:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* Вторинні кнопки */
+.secondary-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 24 12 24;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.secondary-button:pressed {
+    -fx-scale-x: 0.97;
+    -fx-scale-y: 0.97;
+}
+
+/* Анімації та переходи */
+.nav-button,
+.primary-button,
+.secondary-button,
+.dashboard-card {
+    -fx-transition: all 0.3s ease;
+}
+
+/* Адаптивність для різних розмірів екрану */
+@media (max-width: 1200px) {
+    .title-text {
+        -fx-font-size: 28px;
+    }
+
+    .subtitle-text {
+        -fx-font-size: 16px;
+    }
+}
+
+@media (max-width: 800px) {
+    .side-nav {
+        -fx-pref-width: 160;
+    }
+
+    .title-text {
+        -fx-font-size: 24px;
+    }
+
+    .nav-button {
+        -fx-font-size: 12px;
+        -fx-padding: 10 12 10 12;
+    }
+}
+
+/* Стилі для скролбарів */
+.scroll-bar {
     -fx-background-color: transparent;
 }
 
-.scroll-bar:vertical .thumb,
-.scroll-bar:horizontal .thumb {
-    -fx-background-color: #dee2e6;
-    -fx-background-radius: 5em;
+.scroll-bar .track {
+    -fx-background-color: -fx-bg-primary;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
 }
 
-.scroll-bar:vertical .thumb:hover,
-.scroll-bar:horizontal .thumb:hover {
-    -fx-background-color: #adb5bd;
+.scroll-bar .thumb {
+    -fx-background-color: -fx-border-medium;
+    -fx-background-insets: 3;
+    -fx-background-radius: 5;
 }
 
-/* Table Styles */
-.table-view {
+.scroll-bar .thumb:hover {
+    -fx-background-color: -fx-text-secondary;
+}
+
+/* Додаткові стилі для покращення UX */
+.button:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-border-radius: inherit;
+}
+
+/* Ефект завантаження для карток */
+.dashboard-card.loading {
+    -fx-opacity: 0.7;
+}
+
+/* Стилі для успішних дій */
+.success-indicator {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: white;
+    -fx-padding: 8 16 8 16;
+    -fx-background-radius: 20;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+/* ===== СТИЛІ ДЛЯ СТОРІНКИ ПРОДУКТІВ ===== */
+
+/* Заголовок секції */
+.section-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-fill: -fx-text-primary;
+}
+
+/* Поле пошуку */
+.search-field {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 15 10 15;
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-text-primary;
+    -fx-prompt-text-fill: -fx-text-secondary;
+}
+
+.search-field:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, -fx-primary-color, 5, 0.3, 0, 0);
+}
+
+/* ComboBox стилі */
+.combo-box {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 8 12 8 12;
+}
+
+.combo-box .arrow-button {
     -fx-background-color: transparent;
+    -fx-border-color: transparent;
 }
 
-.table-view .column-header-background {
-    -fx-background-color: #f8f9fa;
+.combo-box .arrow {
+    -fx-background-color: -fx-text-secondary;
 }
 
-.table-view .column-header {
-    -fx-background-color: transparent;
-    -fx-padding: 8px;
-    -fx-border-color: #dee2e6;
+.combo-box:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+}
+
+/* Таблиця продуктів */
+.products-table {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+}
+
+/* Заголовки колонок таблиці */
+.products-table .column-header {
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 12 8 12 8;
+    -fx-border-color: transparent transparent -fx-border-light transparent;
     -fx-border-width: 0 0 1 0;
 }
 
-.table-row-cell {
-    -fx-background-color: white;
-    -fx-border-color: transparent;
-    -fx-padding: 5px;
+.products-table .column-header:hover {
+    -fx-background-color: linear-gradient(to bottom, #e9ecef, #dee2e6);
 }
 
-.table-row-cell:odd {
-    -fx-background-color: #f8f9fa;
+/* Рядки таблиці */
+.products-table .table-row-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-light transparent;
+    -fx-border-width: 0 0 0.5 0;
 }
 
-.table-row-cell:selected {
-    -fx-background-color: #007bff;
+.products-table .table-row-cell:hover {
+    -fx-background-color: #f8f9ff;
+}
+
+.products-table .table-row-cell:selected {
+    -fx-background-color: linear-gradient(to right,
+    rgba(108, 99, 255, 0.1),
+    rgba(139, 127, 255, 0.1));
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Клітинки таблиці */
+.products-table .table-cell {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 13px;
+    -fx-padding: 12 8 12 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Спеціальні стилі для різних типів клітинок */
+.products-table .rating-cell {
+    -fx-alignment: CENTER;
+    -fx-font-weight: 600;
+}
+
+.products-table .allergic-cell {
+    -fx-alignment: CENTER;
+}
+
+.products-table .actions-cell {
+    -fx-alignment: CENTER;
+}
+
+/* Placeholder текст */
+.placeholder-text {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 16px;
+    -fx-font-style: italic;
+    -fx-padding: 40 20 40 20;
+}
+
+/* Кнопки дій в таблиці */
+.table-action-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 6 12 6 12;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 1;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-cursor: hand;
+}
+
+.table-action-button:hover {
+    -fx-background-color: -fx-primary-color;
     -fx-text-fill: white;
+}
+
+.table-action-button.delete-button {
+    -fx-text-fill: #e74c3c;
+    -fx-border-color: #e74c3c;
+}
+
+.table-action-button.delete-button:hover {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Стилі для рейтингу */
+.rating-stars {
+    -fx-spacing: 2;
+}
+
+.rating-star {
+    -fx-text-fill: #ffd700;
+    -fx-font-size: 14px;
+}
+
+.rating-star.empty {
+    -fx-text-fill: -fx-border-medium;
+}
+
+/* Індикатор алергічності */
+.allergic-indicator {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #c62828;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.non-allergic-indicator {
+    -fx-background-color: #e8f5e8;
+    -fx-text-fill: #2e7d32;
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 12;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* Скролбар для таблиці */
+.products-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12;
+}
+
+.products-table .scroll-bar:vertical .track {
+    -fx-background-color: #f1f3f4;
+    -fx-background-radius: 6;
+}
+
+.products-table .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-border-medium;
+    -fx-background-radius: 6;
+    -fx-background-insets: 2;
+}
+
+.products-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-text-secondary;
+}
+
+/* Анімації для таблиці */
+.products-table .table-row-cell {
+    -fx-transition: background-color 0.2s ease;
+}
+
+.table-action-button {
+    -fx-transition: all 0.2s ease;
+}
+
+/* Порожня таблиця */
+.products-table:empty {
+    -fx-background-color: -fx-bg-primary;
+    -fx-border-style: dashed;
+    -fx-border-color: -fx-border-medium;
+}
+
+/* ===== СТИЛІ ДЛЯ СТОРІНКИ НАГАДУВАНЬ ===== */
+
+/* Загальні стилі кнопок (якщо не визначені раніше) */
+.button {
+    -fx-background-color: linear-gradient(to right, -fx-primary-color, #8b7fff);
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 24 12 24;
+    -fx-background-radius: 25;
+    -fx-border-radius: 25;
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+}
+
+.button:hover {
+    -fx-background-color: linear-gradient(to right, -fx-primary-dark, #7a6fd9);
+    -fx-effect: dropshadow(gaussian, -fx-shadow-hover, 12, 0, 0, 4);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+.button-secondary {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-primary-color;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-padding: 12 24 12 24;
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-border-radius: 25;
+    -fx-background-radius: 25;
+    -fx-cursor: hand;
+}
+
+.button-secondary:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+    -fx-scale-x: 1.03;
+    -fx-scale-y: 1.03;
+}
+
+/* DatePicker стилі */
+.date-picker {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-size: 14px;
+}
+
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-padding: 10 15 10 15;
+}
+
+.date-picker .arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.date-picker .arrow {
+    -fx-background-color: -fx-text-secondary;
+}
+
+.date-picker:focused {
+    -fx-border-color: -fx-primary-color;
+    -fx-border-width: 2;
+    -fx-effect: dropshadow(gaussian, -fx-primary-color, 5, 0.3, 0, 0);
+}
+
+/* Popup календаря */
+.date-picker-popup {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 15, 0, 0, 5);
+}
+
+.date-picker-popup .month-year-pane {
+    -fx-background-color: linear-gradient(to bottom, -fx-primary-color, -fx-primary-dark);
+    -fx-background-radius: 12 12 0 0;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+}
+
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -fx-text-primary;
+    -fx-border-color: transparent;
+    -fx-font-size: 13px;
+}
+
+.date-picker-popup .day-cell:hover {
+    -fx-background-color: rgba(108, 99, 255, 0.1);
+    -fx-background-radius: 15;
+}
+
+.date-picker-popup .selected {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+}
+
+/* Таблиця нагадувань */
+.reminders-table {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: -fx-border-light;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-effect: dropshadow(gaussian, -fx-shadow, 8, 0, 0, 3);
+}
+
+/* Заголовки колонок для таблиці нагадувань */
+.reminders-table .column-header {
+    -fx-background-color: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-weight: 600;
+    -fx-font-size: 13px;
+    -fx-padding: 12 8 12 8;
+    -fx-border-color: transparent transparent -fx-border-light transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.reminders-table .column-header:hover {
+    -fx-background-color: linear-gradient(to bottom, #e9ecef, #dee2e6);
+}
+
+/* Рядки таблиці нагадувань */
+.reminders-table .table-row-cell {
+    -fx-background-color: -fx-bg-secondary;
+    -fx-border-color: transparent transparent -fx-border-light transparent;
+    -fx-border-width: 0 0 0.5 0;
+}
+
+.reminders-table .table-row-cell:hover {
+    -fx-background-color: #f0f8ff;
+}
+
+.reminders-table .table-row-cell:selected {
+    -fx-background-color: linear-gradient(to right,
+    rgba(0, 212, 170, 0.1),
+    rgba(0, 184, 148, 0.1));
+    -fx-text-fill: -fx-text-primary;
+}
+
+/* Клітинки таблиці нагадувань */
+.reminders-table .table-cell {
+    -fx-text-fill: -fx-text-primary;
+    -fx-font-size: 13px;
+    -fx-padding: 12 8 12 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Стилі для статусу виконання */
+.reminder-status {
+    -fx-padding: 4 12 4 12;
+    -fx-background-radius: 15;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-alignment: CENTER;
+}
+
+.reminder-completed {
+    -fx-background-color: #e8f5e8;
+    -fx-text-fill: #2e7d32;
+}
+
+.reminder-pending {
+    -fx-background-color: #fff3e0;
+    -fx-text-fill: #f57c00;
+}
+
+.reminder-overdue {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #c62828;
+}
+
+/* Стилі для дати та часу */
+.reminder-datetime {
+    -fx-font-family: "Consolas", "Monaco", monospace;
+    -fx-font-size: 12px;
+}
+
+.reminder-datetime.today {
+    -fx-text-fill: -fx-secondary-color;
+    -fx-font-weight: 600;
+}
+
+.reminder-datetime.overdue {
+    -fx-text-fill: #e74c3c;
+    -fx-font-weight: 600;
+}
+
+/* Кнопки дій для нагадувань */
+.reminder-action-button {
+    -fx-background-color: transparent;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-padding: 4 8 4 8;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+    -fx-background-radius: 12;
+    -fx-cursor: hand;
+    -fx-min-width: 60;
+}
+
+.reminder-complete-button {
+    -fx-text-fill: -fx-secondary-color;
+    -fx-border-color: -fx-secondary-color;
+}
+
+.reminder-complete-button:hover {
+    -fx-background-color: -fx-secondary-color;
+    -fx-text-fill: white;
+}
+
+.reminder-edit-button {
+    -fx-text-fill: -fx-primary-color;
+    -fx-border-color: -fx-primary-color;
+}
+
+.reminder-edit-button:hover {
+    -fx-background-color: -fx-primary-color;
+    -fx-text-fill: white;
+}
+
+.reminder-delete-button {
+    -fx-text-fill: #e74c3c;
+    -fx-border-color: #e74c3c;
+}
+
+.reminder-delete-button:hover {
+    -fx-background-color: #e74c3c;
+    -fx-text-fill: white;
+}
+
+/* Контейнер для кнопок дій */
+.reminder-actions-container {
+    -fx-spacing: 5;
+    -fx-alignment: CENTER;
+}
+
+/* Іконки для статусу */
+.status-icon {
+    -fx-font-size: 14px;
+    -fx-padding: 0 5 0 0;
+}
+
+.status-icon.completed {
+    -fx-text-fill: #2e7d32;
+}
+
+.status-icon.pending {
+    -fx-text-fill: #f57c00;
+}
+
+.status-icon.overdue {
+    -fx-text-fill: #c62828;
+}
+
+/* Placeholder для порожньої таблиці нагадувань */
+.reminders-table .placeholder .label {
+    -fx-text-fill: -fx-text-secondary;
+    -fx-font-size: 16px;
+    -fx-font-style: italic;
+    -fx-padding: 40 20 40 20;
+}
+
+/* Hover ефекти для фільтрів */
+.date-picker:hover,
+.combo-box:hover {
+    -fx-border-color: -fx-primary-color;
+    -fx-effect: dropshadow(gaussian, rgba(108, 99, 255, 0.3), 5, 0, 0, 0);
+}
+
+/* Скролбар для таблиці нагадувань */
+.reminders-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 12;
+}
+
+.reminders-table .scroll-bar:vertical .track {
+    -fx-background-color: #f1f3f4;
+    -fx-background-radius: 6;
+}
+
+.reminders-table .scroll-bar:vertical .thumb {
+    -fx-background-color: -fx-border-medium;
+    -fx-background-radius: 6;
+    -fx-background-insets: 2;
+}
+
+.reminders-table .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -fx-text-secondary;
 }

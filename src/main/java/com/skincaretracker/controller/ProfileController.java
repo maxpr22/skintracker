@@ -70,7 +70,7 @@ public class ProfileController {
         currentUser = databaseManager.getCurrentUser();
 
         if (currentUser == null) {
-            showError("No user logged in");
+            showError("Користувач не увійшов в систему");
             return;
         }
 
@@ -79,16 +79,14 @@ public class ProfileController {
     }
 
     private void setupComboBoxes() {
-        // Setup skin type options
         skinTypeComboBox.setItems(FXCollections.observableArrayList(
-                "Normal",
-                "Dry",
-                "Oily",
-                "Combination",
-                "Sensitive"
+                "Нормальна",
+                "Суха",
+                "Жирна",
+                "Комбінована",
+                "Чутлива"
         ));
 
-        // Setup time ComboBoxes
         reminderHourComboBox.setItems(FXCollections.observableArrayList(
                 IntStream.rangeClosed(0, 23).boxed().toList()
         ));
@@ -99,7 +97,6 @@ public class ProfileController {
 
     private void loadUserProfile() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:skincare_tracker.db")) {
-            // Load basic user info
             String userSql = "SELECT * FROM users WHERE id = ?";
             try (PreparedStatement pstmt = conn.prepareStatement(userSql)) {
                 pstmt.setLong(1, currentUser.getId());
@@ -114,19 +111,16 @@ public class ProfileController {
                             skinTypeComboBox.setValue(skinType);
                         }
 
-                        // Load notification preferences
                         emailNotificationsCheckBox.setSelected(rs.getBoolean("email_notifications"));
                         pushNotificationsCheckBox.setSelected(rs.getBoolean("push_notifications"));
                         reminderNotificationsCheckBox.setSelected(rs.getBoolean("reminder_notifications"));
 
-                        // Load reminder time
                         String reminderTime = rs.getString("preferred_reminder_time");
                         if (reminderTime != null && reminderTime.contains(":")) {
                             String[] timeParts = reminderTime.split(":");
                             reminderHourComboBox.setValue(Integer.parseInt(timeParts[0]));
                             reminderMinuteComboBox.setValue(Integer.parseInt(timeParts[1]));
                         } else {
-                            // Set default time
                             reminderHourComboBox.setValue(9);
                             reminderMinuteComboBox.setValue(0);
                         }
@@ -134,17 +128,15 @@ public class ProfileController {
                 }
             }
 
-            // Load skin concerns
             loadSkinConcerns(conn);
 
         } catch (SQLException e) {
             System.err.println("Error loading user profile: " + e.getMessage());
-            showError("Error loading user profile");
+            showError("Помилка завантаження профілю користувача");
         }
     }
 
     private void loadSkinConcerns(Connection conn) throws SQLException {
-        // Reset all checkboxes
         acneCheckBox.setSelected(false);
         drynessCheckBox.setSelected(false);
         sensitivityCheckBox.setSelected(false);
@@ -177,12 +169,12 @@ public class ProfileController {
         String skinType = skinTypeComboBox.getValue();
 
         if (username.isEmpty() || email.isEmpty()) {
-            showError("Please fill in all required fields");
+            showError("Будь ласка, заповніть всі обов'язкові поля");
             return;
         }
 
         if (!isValidEmail(email)) {
-            showError("Please enter a valid email address");
+            showError("Будь ласка, введіть дійсну електронну адресу");
             return;
         }
 
@@ -196,20 +188,19 @@ public class ProfileController {
 
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    // Update current user object
                     currentUser.setUsername(username);
                     currentUser.setEmail(email);
-                    showSuccess("Personal information updated successfully");
+                    showSuccess("Особисту інформацію успішно оновлено");
                 } else {
-                    showError("Failed to update personal information");
+                    showError("Не вдалося оновити особисту інформацію");
                 }
             }
         } catch (SQLException e) {
             if (e.getMessage().contains("UNIQUE constraint failed")) {
-                showError("Username or email already exists");
+                showError("Ім'я користувача або електронна пошта вже існують");
             } else {
                 System.err.println("Error updating personal info: " + e.getMessage());
-                showError("Error updating personal information");
+                showError("Помилка оновлення особистої інформації");
             }
         }
     }
@@ -217,14 +208,12 @@ public class ProfileController {
     @FXML
     private void updateSkinConcerns() {
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:skincare_tracker.db")) {
-            // First, delete existing skin concerns
             String deleteSql = "DELETE FROM skin_concerns WHERE user_id = ?";
             try (PreparedStatement deleteStmt = conn.prepareStatement(deleteSql)) {
                 deleteStmt.setLong(1, currentUser.getId());
                 deleteStmt.executeUpdate();
             }
 
-            // Then, insert new skin concerns
             List<String> selectedConcerns = new ArrayList<>();
             if (acneCheckBox.isSelected()) selectedConcerns.add("acne");
             if (drynessCheckBox.isSelected()) selectedConcerns.add("dryness");
@@ -243,11 +232,11 @@ public class ProfileController {
                 }
             }
 
-            showSuccess("Skin concerns updated successfully");
+            showSuccess("Проблеми шкіри успішно оновлено");
 
         } catch (SQLException e) {
             System.err.println("Error updating skin concerns: " + e.getMessage());
-            showError("Error updating skin concerns");
+            showError("Помилка оновлення проблем шкіри");
         }
     }
 
@@ -256,7 +245,7 @@ public class ProfileController {
         if (reminderNotificationsCheckBox.isSelected() &&
                 (reminderHourComboBox.getValue() == null ||
                         reminderMinuteComboBox.getValue() == null)) {
-            showError("Please select reminder time");
+            showError("Будь ласка, виберіть час нагадування");
             return;
         }
 
@@ -286,14 +275,14 @@ public class ProfileController {
 
                 int rowsAffected = pstmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    showSuccess("Notification preferences updated successfully");
+                    showSuccess("Налаштування сповіщень успішно оновлено");
                 } else {
-                    showError("Failed to update notification preferences");
+                    showError("Не вдалося оновити налаштування сповіщень");
                 }
             }
         } catch (SQLException e) {
             System.err.println("Error updating notification preferences: " + e.getMessage());
-            showError("Error updating notification preferences");
+            showError("Помилка оновлення налаштувань сповіщень");
         }
     }
 
@@ -304,23 +293,22 @@ public class ProfileController {
         String confirmPassword = confirmPasswordField.getText();
 
         if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
-            showError("Please fill in all password fields");
+            showError("Будь ласка, заповніть всі поля паролів");
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            showError("New passwords do not match");
+            showError("Нові паролі не співпадають");
             return;
         }
 
         if (!isValidPassword(newPassword)) {
-            showError("Password must be at least 8 characters long and contain at least one number, " +
-                    "one uppercase letter, and one special character");
+            showError("Пароль повинен містити щонайменше 8 символів, одну цифру, " +
+                    "одну велику літеру та один спеціальний символ");
             return;
         }
 
         try (Connection conn = DriverManager.getConnection("jdbc:sqlite:skincare_tracker.db")) {
-            // First, verify current password
             String verifySql = "SELECT password FROM users WHERE id = ?";
             try (PreparedStatement verifyStmt = conn.prepareStatement(verifySql)) {
                 verifyStmt.setLong(1, currentUser.getId());
@@ -329,102 +317,81 @@ public class ProfileController {
                     if (rs.next()) {
                         String storedPassword = rs.getString("password");
                         if (!currentPassword.equals(storedPassword)) {
-                            showError("Current password is incorrect");
+                            showError("Поточний пароль неправильний");
                             return;
                         }
                     } else {
-                        showError("User not found");
+                        showError("Користувача не знайдено");
                         return;
                     }
                 }
             }
 
-            // Update password
             String updateSql = "UPDATE users SET password = ? WHERE id = ?";
             try (PreparedStatement updateStmt = conn.prepareStatement(updateSql)) {
-                updateStmt.setString(1, newPassword); // В продакшені треба хешувати
+                updateStmt.setString(1, newPassword);
                 updateStmt.setLong(2, currentUser.getId());
 
                 int rowsAffected = updateStmt.executeUpdate();
                 if (rowsAffected > 0) {
-                    showSuccess("Password changed successfully");
-                    // Clear password fields
+                    showSuccess("Пароль успішно змінено");
                     currentPasswordField.clear();
                     newPasswordField.clear();
                     confirmPasswordField.clear();
                 } else {
-                    showError("Failed to change password");
+                    showError("Не вдалося змінити пароль");
                 }
             }
 
         } catch (SQLException e) {
             System.err.println("Error changing password: " + e.getMessage());
-            showError("Error changing password");
+            showError("Помилка зміни пароля");
         }
     }
 
     @FXML
     private void deleteAccount() {
         Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmDialog.setTitle("Delete Account");
-        confirmDialog.setHeaderText("Are you sure you want to delete your account?");
-        confirmDialog.setContentText("This action cannot be undone. All your data will be permanently deleted.");
+        confirmDialog.setTitle("Видалити акаунт");
+        confirmDialog.setHeaderText("Ви впевнені, що хочете видалити свій акаунт?");
+        confirmDialog.setContentText("Цю дію неможливо скасувати. Всі ваші дані будуть безповоротно видалені.");
 
         Optional<ButtonType> result = confirmDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try (Connection conn = DriverManager.getConnection("jdbc:sqlite:skincare_tracker.db")) {
-                conn.setAutoCommit(false); // Start transaction
+                conn.setAutoCommit(false);
 
                 try {
-                    // Delete in correct order due to foreign key constraints
-
-                    // Delete reminders
                     String deleteRemindersSql = "DELETE FROM reminders WHERE user_id = ?";
                     try (PreparedStatement stmt = conn.prepareStatement(deleteRemindersSql)) {
                         stmt.setLong(1, currentUser.getId());
                         stmt.executeUpdate();
                     }
 
-                    // Delete products
                     String deleteProductsSql = "DELETE FROM products WHERE user_id = ?";
                     try (PreparedStatement stmt = conn.prepareStatement(deleteProductsSql)) {
                         stmt.setLong(1, currentUser.getId());
                         stmt.executeUpdate();
                     }
 
-                    // Delete skin concerns
                     String deleteConcernsSql = "DELETE FROM skin_concerns WHERE user_id = ?";
                     try (PreparedStatement stmt = conn.prepareStatement(deleteConcernsSql)) {
                         stmt.setLong(1, currentUser.getId());
                         stmt.executeUpdate();
                     }
 
-                    // Delete user
                     String deleteUserSql = "DELETE FROM users WHERE id = ?";
                     try (PreparedStatement stmt = conn.prepareStatement(deleteUserSql)) {
                         stmt.setLong(1, currentUser.getId());
                         int rowsAffected = stmt.executeUpdate();
 
                         if (rowsAffected > 0) {
-                            conn.commit(); // Commit transaction
-
-                            // Clear current user from DatabaseManager
+                            conn.commit();
                             databaseManager.setCurrentUser(null);
-
-                            showSuccess("Account deleted successfully");
-
-                            // TODO: Redirect to login page
-                            // Platform.runLater(() -> {
-                            //     try {
-                            //         // Load login scene
-                            //     } catch (Exception e) {
-                            //         e.printStackTrace();
-                            //     }
-                            // });
-
+                            showSuccess("Акаунт успішно видалено");
                         } else {
                             conn.rollback();
-                            showError("Failed to delete account");
+                            showError("Не вдалося видалити акаунт");
                         }
                     }
 
@@ -437,7 +404,7 @@ public class ProfileController {
 
             } catch (SQLException e) {
                 System.err.println("Error deleting account: " + e.getMessage());
-                showError("Error deleting account");
+                showError("Помилка видалення акаунта");
             }
         }
     }
@@ -452,7 +419,7 @@ public class ProfileController {
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+        alert.setTitle("Помилка");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
@@ -460,7 +427,7 @@ public class ProfileController {
 
     private void showSuccess(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Success");
+        alert.setTitle("Успіх");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();

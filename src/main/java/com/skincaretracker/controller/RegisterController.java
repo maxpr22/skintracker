@@ -41,49 +41,41 @@ public class RegisterController {
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-        // Валідація полів
         if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showError("Будь ласка, заповніть всі поля");
             return;
         }
 
-        // Перевірка довжини логіну
         if (username.length() < 3) {
             showError("Логін повинен містити принаймні 3 символи");
             return;
         }
 
-        // Базова перевірка email
         if (!isValidEmail(email)) {
             showError("Введіть коректну email адресу");
             return;
         }
 
-        // Перевірка паролів
         if (!password.equals(confirmPassword)) {
             showError("Паролі не співпадають");
             return;
         }
 
-        // Перевірка складності паролю
         if (password.length() < 6) {
             showError("Пароль повинен містити принаймні 6 символів");
             return;
         }
 
-        // Спроба створення користувача
         User newUser = databaseManager.createUser(username, email, password);
 
         if (newUser != null) {
             showSuccess("Акаунт успішно створено!");
 
-            // Очищуємо поля
             clearFields();
 
-            // Затримка перед переходом на логін
             new Thread(() -> {
                 try {
-                    Thread.sleep(1500); // 1.5 секунди
+                    Thread.sleep(1500);
                     javafx.application.Platform.runLater(() -> handleBackToLogin(event));
                 } catch (InterruptedException e) {
                     javafx.application.Platform.runLater(() -> handleBackToLogin(event));
@@ -91,7 +83,6 @@ public class RegisterController {
             }).start();
 
         } else {
-            // Перевіряємо чи користувач з таким логіном або email вже існує
             if (isUserExists(username, email)) {
                 showError("Користувач з таким логіном або email вже існує");
             } else {
@@ -144,14 +135,11 @@ public class RegisterController {
     }
 
     private boolean isValidEmail(String email) {
-        // Базова перевірка email регулярним виразом
         String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
         return email.matches(emailRegex);
     }
 
     private boolean isUserExists(String username, String email) {
-        // Перевіряємо чи існує користувач з таким логіном або email
-        // Це спрощена перевірка - в ідеалі потрібно додати окремі методи в DatabaseManager
         try {
             User testUser1 = databaseManager.getUser(username, "dummy");
             User testUser2 = databaseManager.getUser("dummy", email);

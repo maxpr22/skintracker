@@ -14,43 +14,39 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <!-- Header with Navigation and Add Button -->
     <HBox alignment="CENTER_LEFT" spacing="20">
-        <Button text="← Back to Dashboard"
+        <Button text="← Повернутися до статистики"
                 onAction="#goToDashboard"
                 styleClass="button-secondary"/>
-        <Text styleClass="section-title" text="My Reminders"/>
+        <Text styleClass="section-title" text="Мої Нагадування"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Add New Reminder"
+        <Button text="Додати Нове Нагадування"
                 onAction="#showAddReminderDialog"
                 styleClass="button"/>
     </HBox>
 
-    <!-- Filter Options -->
     <HBox spacing="10" alignment="CENTER_LEFT">
         <ComboBox fx:id="statusFilter"
-                  promptText="Filter by Status"/>
+                  promptText="Фільтрувати за статусом"/>
         <DatePicker fx:id="dateFilter"
-                    promptText="Filter by Date"/>
-        <Button text="Clear Filters"
+                    promptText="Фільтрувати за датою"/>
+        <Button text="Очистити Фільтри"
                 onAction="#clearFilters"
                 styleClass="button-secondary"/>
     </HBox>
 
-    <!-- Reminders Table -->
     <TableView fx:id="remindersTable" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="productColumn" text="Product" prefWidth="150"/>
-            <TableColumn fx:id="messageColumn" text="Reminder Message" prefWidth="200"/>
-            <TableColumn fx:id="dateTimeColumn" text="Date &amp; Time" prefWidth="150"/>
-            <TableColumn fx:id="completedColumn" text="Completed" prefWidth="100"/>
-            <TableColumn fx:id="actionsColumn" text="Actions" prefWidth="150"/>
+            <TableColumn fx:id="productColumn" text="Продукт" prefWidth="150"/>
+            <TableColumn fx:id="messageColumn" text="Повідомлення Нагадування" prefWidth="200"/>
+            <TableColumn fx:id="dateTimeColumn" text="Дата та Час" prefWidth="150"/>
+            <TableColumn fx:id="completedColumn" text="Виконано" prefWidth="100"/>
+            <TableColumn fx:id="actionsColumn" text="Дії" prefWidth="200"/>
         </columns>
     </TableView>
 
-    <!-- Notification Settings Button -->
     <HBox alignment="CENTER_RIGHT">
-        <Button text="Notification Settings"
+        <Button text="Налаштування Повідомлень"
                 onAction="#showNotificationSettings"
                 styleClass="button-secondary"/>
     </HBox>

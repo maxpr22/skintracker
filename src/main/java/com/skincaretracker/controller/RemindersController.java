@@ -50,7 +50,6 @@ public class RemindersController {
     @FXML
     private DatePicker dateFilter;
 
-    // Dialog components - not in FXML
     private Dialog<Reminder> reminderDialog;
     private ComboBox<Product> productComboBox;
     private TextArea messageField;
@@ -70,9 +69,8 @@ public class RemindersController {
 
     @FXML
     public void initialize() {
-        // Перевіряємо чи користувач авторизований
         if (!dbManager.isUserLoggedIn()) {
-            showError("User not logged in. Please log in first.");
+            showError("Користувач не авторизований. Будь ласка, увійдіть в систему.");
             return;
         }
 
@@ -96,11 +94,11 @@ public class RemindersController {
             }
 
             currentStage.setScene(scene);
-            currentStage.setTitle("Skincare Tracker - Dashboard");
+            currentStage.setTitle("Skincare Tracker - Головна");
 
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Could not load dashboard: " + e.getMessage());
+            showError("Не вдалося завантажити головну сторінку: " + e.getMessage());
         }
     }
 
@@ -110,7 +108,6 @@ public class RemindersController {
         dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("dateTime"));
         completedColumn.setCellValueFactory(new PropertyValueFactory<>("completed"));
 
-        // Custom cell factories
         productColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(Product product, boolean empty) {
@@ -135,7 +132,6 @@ public class RemindersController {
             }
         });
 
-        // Налаштування checkbox для completed колонки
         completedColumn.setCellFactory(column -> new CheckBoxTableCell<>() {
             @Override
             public void updateItem(Boolean item, boolean empty) {
@@ -159,8 +155,8 @@ public class RemindersController {
 
     private void setupActionsColumn() {
         actionsColumn.setCellFactory(column -> new TableCell<>() {
-            private final Button editButton = new Button("Edit");
-            private final Button deleteButton = new Button("Delete");
+            private final Button editButton = new Button("Редагувати");
+            private final Button deleteButton = new Button("Видалити");
             private final HBox buttons = new HBox(5, editButton, deleteButton);
 
             {
@@ -184,8 +180,8 @@ public class RemindersController {
     }
 
     private void setupFilters() {
-        statusFilter.getItems().addAll("All", "Pending", "Completed");
-        statusFilter.setValue("All");
+        statusFilter.getItems().addAll("Всі", "Очікуючі", "Виконані");
+        statusFilter.setValue("Всі");
 
         statusFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterReminders());
         dateFilter.valueProperty().addListener((obs, oldVal, newVal) -> filterReminders());
@@ -193,28 +189,26 @@ public class RemindersController {
 
     private void setupDialog() {
         reminderDialog = new Dialog<>();
-        reminderDialog.setTitle("Reminder");
-        reminderDialog.setHeaderText("Add New Reminder");
+        reminderDialog.setTitle("Нагадування");
+        reminderDialog.setHeaderText("Додати нове нагадування");
 
         GridPane grid = new GridPane();
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(20, 150, 10, 10));
 
-        // Initialize components
         productComboBox = new ComboBox<>();
         messageField = new TextArea();
         datePicker = new DatePicker();
         hourComboBox = new ComboBox<>();
         minuteComboBox = new ComboBox<>();
-        repeatCheckBox = new CheckBox("Repeat Reminder");
+        repeatCheckBox = new CheckBox("Повторювати нагадування");
         repeatOptionsBox = new VBox(5);
         repeatFrequencyComboBox = new ComboBox<>();
         endDatePicker = new DatePicker();
 
-        // Setup components
         messageField.setPrefRowCount(3);
-        messageField.setPromptText("Reminder Message");
+        messageField.setPromptText("Текст нагадування");
 
         hourComboBox.setItems(FXCollections.observableArrayList(
                 IntStream.rangeClosed(0, 23).boxed().toList()
@@ -223,9 +217,8 @@ public class RemindersController {
                 IntStream.rangeClosed(0, 59).boxed().toList()
         ));
 
-        repeatFrequencyComboBox.getItems().addAll("Daily", "Weekly", "Monthly");
+        repeatFrequencyComboBox.getItems().addAll("Щодня", "Щотижня", "Щомісяця");
 
-        // Setup repeat options visibility
         repeatOptionsBox.getChildren().addAll(repeatFrequencyComboBox, endDatePicker);
         repeatOptionsBox.setVisible(false);
         repeatOptionsBox.setManaged(false);
@@ -235,17 +228,16 @@ public class RemindersController {
             repeatOptionsBox.setManaged(newVal);
         });
 
-        // Add components to grid
-        grid.add(new Label("Product:"), 0, 0);
+        grid.add(new Label("Продукт:"), 0, 0);
         grid.add(productComboBox, 1, 0);
-        grid.add(new Label("Message:"), 0, 1);
+        grid.add(new Label("Повідомлення:"), 0, 1);
         grid.add(messageField, 1, 1);
-        grid.add(new Label("Date:"), 0, 2);
+        grid.add(new Label("Дата:"), 0, 2);
         grid.add(datePicker, 1, 2);
 
         HBox timeBox = new HBox(5);
         timeBox.getChildren().addAll(hourComboBox, new Label(":"), minuteComboBox);
-        grid.add(new Label("Time:"), 0, 3);
+        grid.add(new Label("Час:"), 0, 3);
         grid.add(timeBox, 1, 3);
 
         grid.add(repeatCheckBox, 1, 4);
@@ -264,7 +256,7 @@ public class RemindersController {
             var products = dbManager.getCurrentUserProducts();
             productComboBox.setItems(FXCollections.observableArrayList(products));
         } catch (Exception e) {
-            showError("Error loading products: " + e.getMessage());
+            showError("Помилка завантаження продуктів: " + e.getMessage());
         }
     }
 
@@ -279,13 +271,13 @@ public class RemindersController {
 
         if (selectedProduct == null || message.isEmpty() || date == null ||
                 hour == null || minute == null) {
-            showError("Please fill in all required fields");
+            showError("Будь ласка, заповніть всі обов'язкові поля");
             return null;
         }
 
         LocalDateTime dateTime = LocalDateTime.of(date, LocalTime.of(hour, minute));
         if (dateTime.isBefore(LocalDateTime.now())) {
-            showError("Reminder time must be in the future");
+            showError("Час нагадування має бути в майбутньому");
             return null;
         }
 
@@ -296,14 +288,14 @@ public class RemindersController {
     private void showAddReminderDialog() {
         resetDialogFields();
         loadProductsIntoComboBox();
-        reminderDialog.setHeaderText("Add New Reminder");
+        reminderDialog.setHeaderText("Додати нове нагадування");
 
         Optional<Reminder> result = reminderDialog.showAndWait();
         result.ifPresent(this::addReminderToDatabase);
     }
 
     private void showEditDialog(Reminder reminder) {
-        reminderDialog.setHeaderText("Edit Reminder");
+        reminderDialog.setHeaderText("Редагувати нагадування");
         loadProductsIntoComboBox();
 
         productComboBox.setValue(reminder.getProduct());
@@ -320,7 +312,7 @@ public class RemindersController {
             updateReminderInDatabase(reminder);
         });
 
-        reminderDialog.setHeaderText("Add New Reminder");
+        reminderDialog.setHeaderText("Додати нове нагадування");
     }
 
     private void resetDialogFields() {
@@ -336,16 +328,16 @@ public class RemindersController {
 
     @FXML
     private void clearFilters() {
-        statusFilter.setValue("All");
+        statusFilter.setValue("Всі");
         dateFilter.setValue(null);
     }
 
     @FXML
     private void showNotificationSettings() {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Notification Settings");
+        alert.setTitle("Налаштування сповіщень");
         alert.setHeaderText(null);
-        alert.setContentText("Notification settings will be implemented in a future update.");
+        alert.setContentText("Налаштування сповіщень будуть реалізовані в майбутньому оновленні.");
         alert.showAndWait();
     }
 
@@ -355,8 +347,8 @@ public class RemindersController {
 
         ObservableList<Reminder> filteredList = allReminders.filtered(reminder -> {
             boolean matchesStatus = switch (status) {
-                case "Pending" -> !reminder.isCompleted();
-                case "Completed" -> reminder.isCompleted();
+                case "Очікуючі" -> !reminder.isCompleted();
+                case "Виконані" -> reminder.isCompleted();
                 default -> true;
             };
 
@@ -371,9 +363,9 @@ public class RemindersController {
 
     private void showDeleteConfirmation(Reminder reminder) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Reminder");
-        alert.setHeaderText("Delete Reminder for " + reminder.getProduct().getName());
-        alert.setContentText("Are you sure you want to delete this reminder?");
+        alert.setTitle("Видалити нагадування");
+        alert.setHeaderText("Видалити нагадування для " + reminder.getProduct().getName());
+        alert.setContentText("Ви впевнені, що хочете видалити це нагадування?");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -381,14 +373,13 @@ public class RemindersController {
         }
     }
 
-    // Database operations
     private void loadRemindersFromDatabase() {
         try {
             var remindersFromDb = dbManager.getCurrentUserReminders();
             allReminders.setAll(remindersFromDb);
-            filterReminders(); // Apply current filters
+            filterReminders();
         } catch (Exception e) {
-            showError("Error loading reminders: " + e.getMessage());
+            showError("Помилка завантаження нагадувань: " + e.getMessage());
         }
     }
 
@@ -403,12 +394,12 @@ public class RemindersController {
             if (createdReminder != null) {
                 allReminders.add(createdReminder);
                 filterReminders();
-                showInfo("Reminder added successfully!");
+                showInfo("Нагадування успішно додано!");
             } else {
-                showError("Failed to create reminder");
+                showError("Не вдалося створити нагадування");
             }
         } catch (Exception e) {
-            showError("Error adding reminder: " + e.getMessage());
+            showError("Помилка додавання нагадування: " + e.getMessage());
         }
     }
 
@@ -417,12 +408,12 @@ public class RemindersController {
             boolean updated = dbManager.updateReminder(reminder);
             if (updated) {
                 remindersTable.refresh();
-                showInfo("Reminder updated successfully!");
+                showInfo("Нагадування успішно оновлено!");
             } else {
-                showError("Failed to update reminder");
+                showError("Не вдалося оновити нагадування");
             }
         } catch (Exception e) {
-            showError("Error updating reminder: " + e.getMessage());
+            showError("Помилка оновлення нагадування: " + e.getMessage());
         }
     }
 
@@ -432,18 +423,18 @@ public class RemindersController {
             if (deleted) {
                 allReminders.remove(reminder);
                 filterReminders();
-                showInfo("Reminder deleted successfully!");
+                showInfo("Нагадування успішно видалено!");
             } else {
-                showError("Failed to delete reminder");
+                showError("Не вдалося видалити нагадування");
             }
         } catch (Exception e) {
-            showError("Error deleting reminder: " + e.getMessage());
+            showError("Помилка видалення нагадування: " + e.getMessage());
         }
     }
 
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
+        alert.setTitle("Помилка");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
@@ -451,13 +442,12 @@ public class RemindersController {
 
     private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
+        alert.setTitle("Інформація");
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }
 
-    // Метод для оновлення даних ззовні (наприклад, після повернення з іншого екрана)
     public void refreshData() {
         loadRemindersFromDatabase();
     }

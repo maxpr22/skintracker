@@ -52,18 +52,17 @@ public class ProductsController {
     private final ObservableList<Product> products = FXCollections.observableArrayList();
     private FilteredList<Product> filteredProducts;
 
-    // Dialog components
     private Dialog<Product> productDialog;
     private TextField productNameField;
     private TextArea productDescriptionField;
     private CheckBox allergicCheckBox;
     private HBox ratingStars;
     private int selectedRating = 0;
-    private Product editingProduct = null; // Track which product we're editing
+    private Product editingProduct = null;
 
     public void initialize() {
         if (!dbManager.isUserLoggedIn()) {
-            showError("User not logged in. Please login first.");
+            showError("Користувач не увійшов в систему. Будь ласка, увійдіть спочатку.");
             goBackToDashboard();
             return;
         }
@@ -89,14 +88,14 @@ public class ProductsController {
             }
 
             currentStage.setScene(dashboardScene);
-            currentStage.setTitle("Skin Care Tracker - Dashboard");
+            currentStage.setTitle("Трекер догляду за шкірою - Головна панель");
 
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Failed to load dashboard: " + e.getMessage());
+            showError("Не вдалося завантажити головну панель: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Unexpected error: " + e.getMessage());
+            showError("Неочікувана помилка: " + e.getMessage());
         }
     }
 
@@ -106,11 +105,9 @@ public class ProductsController {
         allergicColumn.setCellValueFactory(new PropertyValueFactory<>("allergic"));
         ratingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
 
-        // Configure allergic column to use checkboxes
         allergicColumn.setCellFactory(CheckBoxTableCell.forTableColumn(allergicColumn));
         allergicColumn.setEditable(true);
 
-        // Configure rating column to show stars
         ratingColumn.setCellFactory(column -> new TableCell<Product, Integer>() {
             @Override
             protected void updateItem(Integer rating, boolean empty) {
@@ -131,8 +128,8 @@ public class ProductsController {
 
     private void setupActionsColumn() {
         actionsColumn.setCellFactory(column -> new TableCell<Product, Void>() {
-            private final Button editButton = new Button("Edit");
-            private final Button deleteButton = new Button("Delete");
+            private final Button editButton = new Button("Редагувати");
+            private final Button deleteButton = new Button("Видалити");
             private final HBox buttons = new HBox(5, editButton, deleteButton);
 
             {
@@ -163,8 +160,8 @@ public class ProductsController {
     }
 
     private void setupFilters() {
-        filterComboBox.getItems().addAll("All", "Allergic", "Non-Allergic");
-        filterComboBox.setValue("All");
+        filterComboBox.getItems().addAll("Всі", "Алергенні", "Неалергенні");
+        filterComboBox.setValue("Всі");
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> filterProducts());
         filterComboBox.valueProperty().addListener((observable, oldValue, newValue) -> filterProducts());
@@ -182,8 +179,8 @@ public class ProductsController {
                     product.getDescription().toLowerCase().contains(searchText);
 
             boolean matchesFilter = switch (filter) {
-                case "Allergic" -> product.isAllergic();
-                case "Non-Allergic" -> !product.isAllergic();
+                case "Алергенні" -> product.isAllergic();
+                case "Неалергенні" -> !product.isAllergic();
                 default -> true;
             };
 
@@ -193,9 +190,9 @@ public class ProductsController {
 
     @FXML
     private void showAddProductDialog() {
-        editingProduct = null; // We're creating a new product
+        editingProduct = null;
         resetDialogFields();
-        productDialog.setHeaderText("Add New Product");
+        productDialog.setHeaderText("Додати новий продукт");
 
         Optional<Product> result = productDialog.showAndWait();
         if (result.isPresent()) {
@@ -205,30 +202,30 @@ public class ProductsController {
 
     private void createProductDialog() {
         productDialog = new Dialog<>();
-        productDialog.setTitle("Product Manager");
+        productDialog.setTitle("Менеджер продуктів");
 
         VBox content = new VBox(15);
         content.setPadding(new Insets(20));
 
         productNameField = new TextField();
-        productNameField.setPromptText("Product Name");
+        productNameField.setPromptText("Назва продукту");
 
         productDescriptionField = new TextArea();
-        productDescriptionField.setPromptText("Description");
+        productDescriptionField.setPromptText("Опис");
         productDescriptionField.setPrefRowCount(3);
 
-        allergicCheckBox = new CheckBox("Mark as Allergic");
+        allergicCheckBox = new CheckBox("Позначити як алергенний");
 
         HBox ratingContainer = new HBox(10);
-        ratingContainer.getChildren().add(new Label("Rating:"));
+        ratingContainer.getChildren().add(new Label("Рейтинг:"));
         ratingStars = new HBox(5);
         setupRatingStars();
         ratingContainer.getChildren().add(ratingStars);
 
         content.getChildren().addAll(
-                new Label("Product Name:"),
+                new Label("Назва продукту:"),
                 productNameField,
-                new Label("Description:"),
+                new Label("Опис:"),
                 productDescriptionField,
                 allergicCheckBox,
                 ratingContainer
@@ -238,7 +235,6 @@ public class ProductsController {
         dialogPane.setContent(content);
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        // Improve validation and result conversion
         productDialog.setResultConverter(buttonType -> {
             if (buttonType == ButtonType.OK) {
                 return validateAndCreateProduct();
@@ -246,11 +242,10 @@ public class ProductsController {
             return null;
         });
 
-        // Add validation on OK button
         Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
         okButton.addEventFilter(javafx.event.ActionEvent.ACTION, event -> {
             if (!isValidInput()) {
-                event.consume(); // Prevent dialog from closing
+                event.consume();
             }
         });
     }
@@ -264,7 +259,6 @@ public class ProductsController {
         }
 
         if (editingProduct != null) {
-            // Return updated product with existing ID
             return new Product(
                     editingProduct.getId(),
                     name,
@@ -273,7 +267,6 @@ public class ProductsController {
                     selectedRating
             );
         } else {
-            // Return new product (ID will be set by database)
             return new Product(
                     0L,
                     name,
@@ -288,13 +281,13 @@ public class ProductsController {
         String name = productNameField.getText().trim();
 
         if (name.isEmpty()) {
-            showError("Product name is required");
+            showError("Назва продукту є обов'язковою");
             productNameField.requestFocus();
             return false;
         }
 
-        if (name.length() > 100) { // Assuming max length
-            showError("Product name is too long (max 100 characters)");
+        if (name.length() > 100) {
+            showError("Назва продукту занадто довга (максимум 100 символів)");
             productNameField.requestFocus();
             return false;
         }
@@ -334,14 +327,14 @@ public class ProductsController {
     }
 
     private void showEditDialog(Product product) {
-        editingProduct = product; // Set the product we're editing
+        editingProduct = product;
 
         productNameField.setText(product.getName());
         productDescriptionField.setText(product.getDescription());
         allergicCheckBox.setSelected(product.isAllergic());
         selectedRating = product.getRating();
         updateRatingStars();
-        productDialog.setHeaderText("Edit Product");
+        productDialog.setHeaderText("Редагувати продукт");
 
         Optional<Product> result = productDialog.showAndWait();
         if (result.isPresent()) {
@@ -353,7 +346,6 @@ public class ProductsController {
         try {
             boolean success = dbManager.updateProduct(updatedProduct);
             if (success) {
-                // Find and update the product in our list
                 for (int i = 0; i < products.size(); i++) {
                     Product p = products.get(i);
                     if (p.getId().equals(updatedProduct.getId())) {
@@ -366,23 +358,22 @@ public class ProductsController {
                     productsTable.refresh();
                     filterProducts();
                 });
-                showInfo("Product updated successfully!");
+                showInfo("Продукт успішно оновлено!");
             } else {
-                showError("Failed to update product in database");
-                // Reload from database to revert changes
+                showError("Не вдалося оновити продукт у базі даних");
                 loadProductsFromDatabase();
             }
         } catch (Exception e) {
-            showError("Error updating product: " + e.getMessage());
+            showError("Помилка при оновленні продукту: " + e.getMessage());
             loadProductsFromDatabase();
         }
     }
 
     private void showDeleteConfirmation(Product product) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Product");
-        alert.setHeaderText("Delete " + product.getName());
-        alert.setContentText("Are you sure you want to delete this product? This will also delete all associated reminders.");
+        alert.setTitle("Видалення продукту");
+        alert.setHeaderText("Видалити " + product.getName());
+        alert.setContentText("Ви впевнені, що хочете видалити цей продукт? Це також видалить всі пов'язані нагадування.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
@@ -397,12 +388,12 @@ public class ProductsController {
                 Platform.runLater(() -> {
                     products.remove(product);
                 });
-                showInfo("Product deleted successfully!");
+                showInfo("Продукт успішно видалено!");
             } else {
-                showError("Failed to delete product from database");
+                showError("Не вдалося видалити продукт з бази даних");
             }
         } catch (Exception e) {
-            showError("Error deleting product: " + e.getMessage());
+            showError("Помилка при видаленні продукту: " + e.getMessage());
         }
     }
 
@@ -419,16 +410,15 @@ public class ProductsController {
                 Platform.runLater(() -> {
                     products.add(createdProduct);
                     filterProducts();
-                    // Scroll to the new product
                     productsTable.getSelectionModel().select(createdProduct);
                     productsTable.scrollTo(createdProduct);
                 });
-                showInfo("Product added successfully!");
+                showInfo("Продукт успішно додано!");
             } else {
-                showError("Failed to add product to database");
+                showError("Не вдалося додати продукт до бази даних");
             }
         } catch (Exception e) {
-            showError("Error adding product: " + e.getMessage());
+            showError("Помилка при додаванні продукту: " + e.getMessage());
         }
     }
 
@@ -441,7 +431,7 @@ public class ProductsController {
                 filterProducts();
             });
         } catch (Exception e) {
-            showError("Failed to load products from database: " + e.getMessage());
+            showError("Не вдалося завантажити продукти з бази даних: " + e.getMessage());
         }
     }
 
@@ -453,7 +443,7 @@ public class ProductsController {
     private void showError(String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
+            alert.setTitle("Помилка");
             alert.setHeaderText(null);
             alert.setContentText(message);
             alert.showAndWait();
@@ -463,7 +453,7 @@ public class ProductsController {
     private void showInfo(String message) {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
+            alert.setTitle("Успіх");
             alert.setHeaderText(null);
             alert.setContentText(message);
             alert.showAndWait();

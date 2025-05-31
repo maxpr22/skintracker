@@ -6,78 +6,74 @@
 <?import javafx.scene.text.Text?>
 
 <ScrollPane xmlns="http://javafx.com/javafx"
-           xmlns:fx="http://javafx.com/fxml"
-           fx:controller="com.skincaretracker.controller.ProfileController"
-           fitToWidth="true">
-    
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.skincaretracker.controller.ProfileController"
+            fitToWidth="true">
+
     <VBox spacing="20" styleClass="profile-pane">
         <padding>
             <Insets top="20" right="20" bottom="20" left="20"/>
         </padding>
 
-        <!-- Profile Header -->
-        <Text styleClass="profile-header" text="My Profile"/>
+        <Text styleClass="profile-header" text="Мій Профіль"/>
 
-        <!-- Personal Information Section -->
         <VBox spacing="15" styleClass="section-box">
-            <Label styleClass="section-title" text="Personal Information"/>
-            
+            <Label styleClass="section-title" text="Особиста Інформація"/>
+
             <GridPane hgap="10" vgap="10">
                 <columnConstraints>
                     <ColumnConstraints minWidth="100" prefWidth="150"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
-                <Label text="Username:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <TextField fx:id="usernameField" 
-                         GridPane.columnIndex="1" 
-                         GridPane.rowIndex="0"/>
+                <Label text="Ім'я користувача:" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <TextField fx:id="usernameField"
+                           GridPane.columnIndex="1"
+                           GridPane.rowIndex="0"/>
 
                 <Label text="Email:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                <TextField fx:id="emailField" 
-                         GridPane.columnIndex="1" 
-                         GridPane.rowIndex="1"/>
+                <TextField fx:id="emailField"
+                           GridPane.columnIndex="1"
+                           GridPane.rowIndex="1"/>
 
-                <Label text="Skin Type:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
-                <ComboBox fx:id="skinTypeComboBox" 
-                         GridPane.columnIndex="1" 
-                         GridPane.rowIndex="2"
-                         maxWidth="Infinity"/>
+                <Label text="Тип шкіри:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <ComboBox fx:id="skinTypeComboBox"
+                          GridPane.columnIndex="1"
+                          GridPane.rowIndex="2"
+                          maxWidth="Infinity"/>
             </GridPane>
 
-            <Button text="Update Personal Information" 
+            <Button text="Оновити Особисту Інформацію"
                     onAction="#updatePersonalInfo"
                     styleClass="button"/>
         </VBox>
 
-        <!-- Skin Concerns Section -->
         <VBox spacing="15" styleClass="section-box">
-            <Label styleClass="section-title" text="Skin Concerns"/>
-            
+            <Label styleClass="section-title" text="Проблеми Шкіри"/>
+
             <VBox spacing="10">
-                <CheckBox fx:id="acneCheckBox" text="Acne"/>
-                <CheckBox fx:id="drynessCheckBox" text="Dryness"/>
-                <CheckBox fx:id="sensitivityCheckBox" text="Sensitivity"/>
-                <CheckBox fx:id="agingCheckBox" text="Aging"/>
-                <CheckBox fx:id="pigmentationCheckBox" text="Pigmentation"/>
+                <CheckBox fx:id="acneCheckBox" text="Акне"/>
+                <CheckBox fx:id="drynessCheckBox" text="Сухість"/>
+                <CheckBox fx:id="sensitivityCheckBox" text="Чутливість"/>
+                <CheckBox fx:id="agingCheckBox" text="Старіння"/>
+                <CheckBox fx:id="pigmentationCheckBox" text="Пігментація"/>
             </VBox>
 
-            <Button text="Update Skin Concerns" 
+            <Button text="Оновити Проблеми Шкіри"
                     onAction="#updateSkinConcerns"
                     styleClass="button"/>
         </VBox>
 
-        <!-- Notification Preferences -->
         <VBox spacing="15" styleClass="section-box">
-            <Label styleClass="section-title" text="Notification Preferences"/>
-            
+            <Label styleClass="section-title" text="Налаштування Повідомлень"/>
+
             <VBox spacing="10">
-                <CheckBox fx:id="emailNotificationsCheckBox" 
-                         text="Email Notifications"/>
-                <CheckBox fx:id="pushNotificationsCheckBox" 
-                         text="Push Notifications"/>
-                <CheckBox fx:id="reminderNotificationsCheckBox" 
-                         text="Reminder Notifications"/>
+                <CheckBox fx:id="emailNotificationsCheckBox"
+                          text="Email Повідомлення"/>
+                <CheckBox fx:id="pushNotificationsCheckBox"
+                          text="Push Повідомлення"/>
+                <CheckBox fx:id="reminderNotificationsCheckBox"
+                          text="Повідомлення-Нагадування"/>
             </VBox>
 
             <GridPane hgap="10" vgap="10">
@@ -86,67 +82,65 @@
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
-                <Label text="Reminder Time:" 
-                       GridPane.columnIndex="0" 
+                <Label text="Час нагадування:"
+                       GridPane.columnIndex="0"
                        GridPane.rowIndex="0"/>
-                <HBox spacing="10" 
-                      GridPane.columnIndex="1" 
+                <HBox spacing="10"
+                      GridPane.columnIndex="1"
                       GridPane.rowIndex="0">
-                    <ComboBox fx:id="reminderHourComboBox" 
-                             promptText="Hour"/>
+                    <ComboBox fx:id="reminderHourComboBox"
+                              promptText="Година"/>
                     <Label text=":"/>
-                    <ComboBox fx:id="reminderMinuteComboBox" 
-                             promptText="Minute"/>
+                    <ComboBox fx:id="reminderMinuteComboBox"
+                              promptText="Хвилина"/>
                 </HBox>
             </GridPane>
 
-            <Button text="Update Notification Preferences" 
+            <Button text="Оновити Налаштування Повідомлень"
                     onAction="#updateNotificationPreferences"
                     styleClass="button"/>
         </VBox>
 
-        <!-- Security Section -->
         <VBox spacing="15" styleClass="section-box">
-            <Label styleClass="section-title" text="Security"/>
-            
+            <Label styleClass="section-title" text="Безпека"/>
+
             <GridPane hgap="10" vgap="10">
                 <columnConstraints>
                     <ColumnConstraints minWidth="100" prefWidth="150"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
-                <Label text="Current Password:" 
-                       GridPane.columnIndex="0" 
+                <Label text="Поточний пароль:"
+                       GridPane.columnIndex="0"
                        GridPane.rowIndex="0"/>
-                <PasswordField fx:id="currentPasswordField" 
-                             GridPane.columnIndex="1" 
-                             GridPane.rowIndex="0"/>
+                <PasswordField fx:id="currentPasswordField"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="0"/>
 
-                <Label text="New Password:" 
-                       GridPane.columnIndex="0" 
+                <Label text="Новий пароль:"
+                       GridPane.columnIndex="0"
                        GridPane.rowIndex="1"/>
-                <PasswordField fx:id="newPasswordField" 
-                             GridPane.columnIndex="1" 
-                             GridPane.rowIndex="1"/>
+                <PasswordField fx:id="newPasswordField"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="1"/>
 
-                <Label text="Confirm Password:" 
-                       GridPane.columnIndex="0" 
+                <Label text="Підтвердити пароль:"
+                       GridPane.columnIndex="0"
                        GridPane.rowIndex="2"/>
-                <PasswordField fx:id="confirmPasswordField" 
-                             GridPane.columnIndex="1" 
-                             GridPane.rowIndex="2"/>
+                <PasswordField fx:id="confirmPasswordField"
+                               GridPane.columnIndex="1"
+                               GridPane.rowIndex="2"/>
             </GridPane>
 
-            <Button text="Change Password" 
+            <Button text="Змінити Пароль"
                     onAction="#changePassword"
                     styleClass="button"/>
         </VBox>
 
-        <!-- Delete Account Section -->
         <VBox spacing="15" styleClass="section-box">
-            <Label styleClass="section-title" text="Account Management"/>
-            
-            <Button text="Delete Account" 
+            <Label styleClass="section-title" text="Управління Обліковим Записом"/>
+
+            <Button text="Видалити Обліковий Запис"
                     onAction="#deleteAccount"
                     styleClass="button-danger"/>
         </VBox>

@@ -39,23 +39,16 @@ public class DashboardController {
         updateCounts();
     }
 
-    /**
-     * Загружает данные текущего пользователя
-     */
     private void loadUserData() {
         User currentUser = dbManager.getCurrentUser();
         if (currentUser != null && userNameLabel != null) {
-            userNameLabel.setText("Welcome, " + currentUser.getUsername());
+            userNameLabel.setText("Вітаємо, " + currentUser.getUsername());
         } else if (userNameLabel != null) {
-            userNameLabel.setText("Welcome, Guest");
-            // Если пользователь не авторизован, возможно стоит перенаправить на логин
+            userNameLabel.setText("Вітаємо, Гість");
             handleUserNotLoggedIn();
         }
     }
 
-    /**
-     * Обновляет счетчики продуктов и напоминаний
-     */
     private void updateCounts() {
         try {
             if (!dbManager.isUserLoggedIn()) {
@@ -63,16 +56,13 @@ public class DashboardController {
                 return;
             }
 
-            // Получаем продукты текущего пользователя
             List<Product> products = dbManager.getCurrentUserProducts();
             if (productCount != null) {
                 productCount.setText(String.valueOf(products.size()));
             }
 
-            // Получаем напоминания текущего пользователя
             List<Reminder> reminders = dbManager.getCurrentUserReminders();
             if (reminderCount != null) {
-                // Считаем только активные (незавершенные) напоминания
                 long activeReminders = reminders.stream()
                         .filter(reminder -> !reminder.isCompleted())
                         .count();
@@ -80,15 +70,12 @@ public class DashboardController {
             }
 
         } catch (Exception e) {
-            System.err.println("Error updating counts: " + e.getMessage());
+            System.err.println("Помилка при оновленні кількості: " + e.getMessage());
             setCountsToZero();
-            showError("Error loading dashboard data: " + e.getMessage());
+            showError("Помилка при завантаженні данних" + e.getMessage());
         }
     }
 
-    /**
-     * Устанавливает счетчики в ноль
-     */
     private void setCountsToZero() {
         if (productCount != null) {
             productCount.setText("0");
@@ -98,18 +85,10 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Обрабатывает случай, когда пользователь не авторизован
-     */
     private void handleUserNotLoggedIn() {
-        // Можно добавить логику для перенаправления на страницу логина
-        // или показать предупреждение
-        System.out.println("Warning: No user logged in on dashboard");
+        System.out.println("Користувач не залогінений");
     }
 
-    /**
-     * Обновляет дашборд (может быть вызван извне после изменений данных)
-     */
     public void refreshDashboard() {
         loadUserData();
         updateCounts();
@@ -133,27 +112,19 @@ public class DashboardController {
         loadView("/view/Profile.fxml", "profile view");
     }
 
-    /**
-     * Проверяет, авторизован ли пользователь
-     */
     private boolean checkUserLoggedIn() {
         if (!dbManager.isUserLoggedIn()) {
-            showWarning("Please log in to access this feature.");
+            showWarning("Будь-ласка зареєструйтесь для доступу.");
             return false;
         }
         return true;
     }
 
-    /**
-     * Вспомогательный метод для загрузки представлений
-     */
     private void loadView(String fxmlPath, String viewName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
 
-            // Если контроллер загруженного представления имеет метод для обновления,
-            // можно его вызвать
             Object controller = loader.getController();
             if (controller instanceof RefreshableController) {
                 ((RefreshableController) controller).refresh();
@@ -162,73 +133,60 @@ public class DashboardController {
             contentArea.getChildren().clear();
             contentArea.getChildren().add(view);
         } catch (IOException e) {
-            showError("Error loading " + viewName + ": " + e.getMessage());
+            showError("Помилка завантаження " + viewName + ": " + e.getMessage());
         } catch (Exception e) {
-            showError("Unexpected error loading " + viewName + ": " + e.getMessage());
+            showError("Непередбачувана помилка завантаження " + viewName + ": " + e.getMessage());
         }
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
         try {
-            // Очищаем текущего пользователя в DatabaseManager
             dbManager.setCurrentUser(null);
 
-            // Загружаем представление логина
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/Login.fxml"));
             Parent loginRoot = loader.load();
 
             Scene loginScene = new Scene(loginRoot);
 
-            // Проверка существования CSS файла
             var cssResource = getClass().getResource("/style/style.css");
             if (cssResource != null) {
                 loginScene.getStylesheets().add(cssResource.toExternalForm());
             }
 
-            // Получаем текущую сцену и устанавливаем новую
             Stage stage = (Stage) contentArea.getScene().getWindow();
             stage.setScene(loginScene);
-            stage.setTitle("Skin Care Tracker - Login");
+            stage.setTitle("Трекер для догляду за шкірою - Вхід");
             stage.show();
 
-            System.out.println("User logged out successfully");
+            System.out.println("Користувач увійшов успішно");
         } catch (IOException e) {
-            showError("Error returning to login: " + e.getMessage());
+            showError("Помилка під час входу: " + e.getMessage());
         } catch (Exception e) {
-            showError("Unexpected error during logout: " + e.getMessage());
+            showError("Непередбачувана помилка під час виходу: " + e.getMessage());
         }
     }
 
-    /**
-     * Показывает сообщение об ошибке
-     */
     private void showError(String message) {
-        System.err.println("Error: " + message);
+        System.err.println("Помилка: " + message);
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText("An error occurred");
+        alert.setTitle("Помилка");
+        alert.setHeaderText("Трапилась помилка");
         alert.setContentText(message);
         alert.showAndWait();
     }
 
-    /**
-     * Показывает предупреждение
-     */
     private void showWarning(String message) {
-        System.out.println("Warning: " + message);
+        System.out.println("Попередження: " + message);
 
         Alert alert = new Alert(Alert.AlertType.WARNING);
-        alert.setTitle("Warning");
-        alert.setHeaderText("Access Restricted");
+        alert.setTitle("Попередження");
+        alert.setHeaderText("В доступі відмовлено");
         alert.setContentText(message);
         alert.showAndWait();
     }
 
-    /**
-     * Интерфейс для контроллеров, которые можно обновлять
-     */
     public interface RefreshableController {
         void refresh();
     }

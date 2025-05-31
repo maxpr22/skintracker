@@ -14,56 +14,53 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <!-- Header with Navigation and Add Product Button -->
     <HBox alignment="CENTER_LEFT" spacing="20">
         <Button fx:id="backToDashboardButton"
-                text="← Back to Dashboard"
+                text="← Повернутися до статистики"
                 onAction="#goBackToDashboard"
                 styleClass="secondary-button"/>
-        <Text styleClass="section-title" text="My Products"/>
+        <Text styleClass="section-title" text="Мої Продукти"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Button text="Add New Product"
+        <Button text="Додати Новий Продукт"
                 onAction="#showAddProductDialog"
                 styleClass="primary-button"/>
     </HBox>
 
-    <!-- Search and Filter Bar -->
     <HBox spacing="15" alignment="CENTER_LEFT">
         <TextField fx:id="searchField"
-                   promptText="Search products..."
+                   promptText="Пошук продуктів..."
                    prefWidth="300"
                    styleClass="search-field"/>
         <ComboBox fx:id="filterComboBox"
-                  promptText="Filter by"
+                  promptText="Фільтрувати за"
                   prefWidth="150"/>
     </HBox>
 
-    <!-- Products Table -->
     <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="products-table">
         <columns>
             <TableColumn fx:id="nameColumn"
-                         text="Product Name"
+                         text="Назва Продукту"
                          prefWidth="150"
                          minWidth="100"/>
             <TableColumn fx:id="descriptionColumn"
-                         text="Description"
+                         text="Опис"
                          prefWidth="200"
                          minWidth="150"/>
             <TableColumn fx:id="allergicColumn"
-                         text="Allergic"
+                         text="Алергічний"
                          prefWidth="80"
                          minWidth="70"/>
             <TableColumn fx:id="ratingColumn"
-                         text="Rating"
+                         text="Рейтинг"
                          prefWidth="100"
                          minWidth="80"/>
             <TableColumn fx:id="actionsColumn"
-                         text="Actions"
-                         prefWidth="120"
-                         minWidth="100"/>
+                         text="Дії"
+                         prefWidth="200"
+                         minWidth="200"/>
         </columns>
         <placeholder>
-            <Label text="No products found. Click 'Add New Product' to get started."
+            <Label text="Продукти не знайдено. Натисніть 'Додати Новий Продукт' для початку."
                    styleClass="placeholder-text"/>
         </placeholder>
     </TableView>
