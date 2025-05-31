@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.skincaretracker.controller.RemindersController"
+      spacing="20">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header with Add Reminder Button -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Text styleClass="section-title" text="My Reminders"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Add New Reminder" 
+                onAction="#showAddReminderDialog"
+                styleClass="button"/>
+    </HBox>
+
+    <!-- Filter Options -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <ComboBox fx:id="statusFilter" 
+                  promptText="Filter by Status"/>
+        <DatePicker fx:id="dateFilter" 
+                    promptText="Filter by Date"/>
+        <Button text="Clear Filters" 
+                onAction="#clearFilters"
+                styleClass="button-secondary"/>
+    </HBox>
+
+    <!-- Reminders Table -->
+    <TableView fx:id="remindersTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="productColumn" text="Product"/>
+            <TableColumn fx:id="messageColumn" text="Reminder Message"/>
+            <TableColumn fx:id="dateTimeColumn" text="Date &amp; Time"/>
+            <TableColumn fx:id="completedColumn" text="Completed"/>
+            <TableColumn fx:id="actionsColumn" text="Actions"/>
+        </columns>
+    </TableView>
+
+    <!-- Add/Edit Reminder Dialog -->
+    <Dialog fx:id="reminderDialog" headerText="Add New Reminder">
+        <dialogPane>
+            <DialogPane>
+                <content>
+                    <VBox spacing="10">
+                        <ComboBox fx:id="productComboBox" 
+                                promptText="Select Product"
+                                maxWidth="Infinity"/>
+                        <TextArea fx:id="messageField" 
+                                promptText="Reminder Message"
+                                prefRowCount="3"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <DatePicker fx:id="datePicker" 
+                                      promptText="Select Date"/>
+                            <ComboBox fx:id="hourComboBox" 
+                                    promptText="Hour"/>
+                            <Text text=":"/>
+                            <ComboBox fx:id="minuteComboBox" 
+                                    promptText="Minute"/>
+                        </HBox>
+                        <CheckBox fx:id="repeatCheckBox" 
+                                text="Repeat Reminder"/>
+                        <VBox fx:id="repeatOptionsBox" 
+                              spacing="5" 
+                              visible="false" 
+                              managed="false">
+                            <ComboBox fx:id="repeatFrequencyComboBox" 
+                                    promptText="Repeat Frequency"/>
+                            <DatePicker fx:id="endDatePicker" 
+                                      promptText="End Date (Optional)"/>
+                        </VBox>
+                    </VBox>
+                </content>
+                <buttonTypes>
+                    <ButtonType fx:constant="OK"/>
+                    <ButtonType fx:constant="CANCEL"/>
+                </buttonTypes>
+            </DialogPane>
+        </dialogPane>
+    </Dialog>
+
+    <!-- Notification Settings Button -->
+    <HBox alignment="CENTER_RIGHT">
+        <Button text="Notification Settings" 
+                onAction="#showNotificationSettings"
+                styleClass="button-secondary"/>
+    </HBox>
+</VBox>

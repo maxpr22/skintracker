@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.text.Text?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.skincaretracker.controller.ProductsController"
+      spacing="20">
+
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <!-- Header with Add Product Button -->
+    <HBox alignment="CENTER_LEFT" spacing="20">
+        <Text styleClass="section-title" text="My Products"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="Add New Product"
+                onAction="#showAddProductDialog"
+                styleClass="primary-button"/>
+    </HBox>
+
+    <!-- Search and Filter Bar -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField"
+                   promptText="Search products..."
+                   prefWidth="300"
+                   styleClass="search-field"/>
+        <ComboBox fx:id="filterComboBox"
+                  promptText="Filter by"
+                  prefWidth="150"/>
+    </HBox>
+
+    <!-- Products Table -->
+    <TableView fx:id="productsTable" VBox.vgrow="ALWAYS" styleClass="products-table">
+        <columns>
+            <TableColumn fx:id="nameColumn"
+                         text="Product Name"
+                         prefWidth="150"
+                         minWidth="100"/>
+            <TableColumn fx:id="descriptionColumn"
+                         text="Description"
+                         prefWidth="200"
+                         minWidth="150"/>
+            <TableColumn fx:id="allergicColumn"
+                         text="Allergic"
+                         prefWidth="80"
+                         minWidth="70"/>
+            <TableColumn fx:id="ratingColumn"
+                         text="Rating"
+                         prefWidth="100"
+                         minWidth="80"/>
+            <TableColumn fx:id="actionsColumn"
+                         text="Actions"
+                         prefWidth="120"
+                         minWidth="100"/>
+        </columns>
+        <placeholder>
+            <Label text="No products found. Click 'Add New Product' to get started."
+                   styleClass="placeholder-text"/>
+        </placeholder>
+    </TableView>
+</VBox>

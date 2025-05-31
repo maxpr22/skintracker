@@ -1,0 +1,168 @@
+/* Global Styles */
+.root {
+    -fx-background-color: #ffffff;
+    -fx-font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Login Screen */
+.login-pane {
+    -fx-background-color: #f8f9fa;
+    -fx-padding: 20px;
+}
+
+.text-field, .password-field {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 4px;
+    -fx-padding: 8px;
+    -fx-font-size: 14px;
+}
+
+.text-field:focused, .password-field:focused {
+    -fx-border-color: #007bff;
+    -fx-border-width: 2px;
+}
+
+.button {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-padding: 8px 16px;
+    -fx-border-radius: 4px;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #0056b3;
+}
+
+/* Dashboard */
+.dashboard-pane {
+    -fx-background-color: #ffffff;
+}
+
+.side-nav {
+    -fx-background-color: #343a40;
+    -fx-padding: 10px;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 10px;
+    -fx-font-size: 14px;
+}
+
+.nav-button:hover {
+    -fx-background-color: #495057;
+}
+
+/* Product List */
+.product-list {
+    -fx-background-color: white;
+    -fx-padding: 10px;
+}
+
+.product-card {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 4px;
+    -fx-padding: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 4, 0, 0, 1);
+}
+
+/* Reminder Section */
+.reminder-pane {
+    -fx-background-color: white;
+    -fx-padding: 15px;
+}
+
+.date-picker {
+    -fx-background-color: white;
+    -fx-border-color: #dee2e6;
+    -fx-border-radius: 4px;
+}
+
+/* Rating Stars */
+.rating-star {
+    -fx-fill: #ffc107;
+    -fx-cursor: hand;
+}
+
+.rating-star:hover {
+    -fx-fill: #ffdb58;
+}
+
+/* Alerts and Notifications */
+.dialog-pane {
+    -fx-background-color: white;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #007bff;
+}
+
+.dialog-pane .header-panel .label {
+    -fx-text-fill: white;
+}
+
+/* Profile Section */
+.profile-pane {
+    -fx-background-color: white;
+    -fx-padding: 20px;
+}
+
+.profile-header {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-padding: 0 0 20px 0;
+}
+
+/* Scroll Bars */
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #dee2e6;
+    -fx-background-radius: 5em;
+}
+
+.scroll-bar:vertical .thumb:hover,
+.scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #adb5bd;
+}
+
+/* Table Styles */
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 8px;
+    -fx-border-color: #dee2e6;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-row-cell {
+    -fx-background-color: white;
+    -fx-border-color: transparent;
+    -fx-padding: 5px;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #f8f9fa;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
